@@ -1,43 +1,37 @@
 # AdventureWorks Customer Companion
 
-Android capstone application for customer product discovery, saved products, recently viewed products, and order review.
+Android app for browsing Adventure Works products, viewing product details, and saving products.
 
-## Project foundation
+## Current features
 
-- Kotlin and Jetpack Compose with Material 3
-- Navigation Compose with centralized top-level routes
-- ViewModels exposing immutable `StateFlow` UI state
-- Hilt dependency injection
-- Retrofit, OkHttp, and kotlinx.serialization networking
-- Room persistence for saved and recently viewed product IDs
-- JUnit and coroutine test dependencies
-- Clean Architecture package boundaries for presentation, domain/session, data, and dependency injection
+- Product catalog loaded from the Adventure Works API
+- Search, category filters, and name or price sorting
+- Product detail screen
+- Saved-product and recently-viewed persistence with Room
+- Light and dark Compose themes
+- Catalog, Orders, and Saved navigation
 
-The starter navigation contains Discover, Orders, and Saved destinations. These screens intentionally remain setup placeholders; product and order behavior should be delivered as vertical feature slices.
+The Orders and Saved screens currently show empty states. Their full lists have not been implemented yet.
 
 ## Demo customer
 
-The assigned team customer is configured once in `DefaultDemoCustomerSession`:
+`DefaultDemoCustomerSession` contains the assigned customer:
 
 - Customer ID: `11711`
 - Display name: `Daniel Davis`
 
-Do not copy this ID into composables, ViewModels, or API calls. Inject `DemoCustomerSession` wherever customer context is needed.
+## API
 
-## API configuration
-
-The default base URL is defined as `BuildConfig.BASE_URL` in `app/build.gradle.kts`:
+The base URL is defined as `BuildConfig.BASE_URL` in `app/build.gradle.kts`:
 
 ```text
 https://api.bootcampcentral.com/
 ```
 
-Endpoint paths and DTOs should be added only after confirming them against the API's Swagger documentation. Network DTOs, Room entities, and domain models must remain separate.
-
 ## Open and run
 
-1. Open this repository root in Android Studio.
-2. Use JDK 17 or Android Studio's embedded JDK for Gradle.
+1. Open the repository root in Android Studio.
+2. Use JDK 17 or Android Studio's embedded JDK.
 3. Allow Gradle sync to finish.
 4. Select the `app` run configuration and an API 26+ emulator or device.
 5. Run the app.
@@ -53,23 +47,16 @@ From PowerShell at the repository root:
 
 The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
 
-## Initial package map
+## Source layout
 
 ```text
 com.pnc.adventureworksmobile
-|-- core/session       Centralized demo customer context
-|-- data/local         Room database, entities, and DAOs
-|-- di                 Hilt bindings and providers
-|-- presentation/home  Starter immutable StateFlow ViewModel
-`-- presentation/navigation  Top-level routes and app navigation
+|-- core/session       Demo customer session
+|-- data/local         Room database and DAOs
+|-- data/remote        Retrofit API and DTOs
+|-- data/repository    Repository implementation
+|-- di                 Hilt modules
+|-- domain             Product models and repository contract
+|-- presentation/home  Catalog and product details
+`-- presentation/navigation  App navigation
 ```
-
-As features are added, keep these responsibilities separate:
-
-- Presentation: screens, route composables, ViewModels, UI state, and user events
-- Domain: models, repository contracts, use cases, and customer-facing business rules
-- Data: repository implementations, services, DTOs, entities, DAOs, and mapping
-
-## Required quality checks
-
-Before merging a feature, verify loading, success, empty, failure, timeout, accessibility, and responsive-layout behavior where applicable. Never commit credentials, `local.properties`, generated build output, or verbose production HTTP logs.

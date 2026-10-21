@@ -6,6 +6,9 @@ import com.pnc.adventureworksmobile.BuildConfig
 import com.pnc.adventureworksmobile.data.local.AdventureWorksDatabase
 import com.pnc.adventureworksmobile.data.local.RecentlyViewedProductDao
 import com.pnc.adventureworksmobile.data.local.SavedProductDao
+import com.pnc.adventureworksmobile.data.remote.ProductApi
+import com.pnc.adventureworksmobile.data.repository.DefaultProductRepository
+import com.pnc.adventureworksmobile.domain.repository.ProductRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -54,6 +57,18 @@ object ApplicationModule {
         .client(client)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
+
+    @Provides
+    @Singleton
+    fun provideProductApi(retrofit: Retrofit): ProductApi = retrofit.create(ProductApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideProductRepository(
+        api: ProductApi,
+        savedProductDao: SavedProductDao,
+        recentlyViewedProductDao: RecentlyViewedProductDao,
+    ): ProductRepository = DefaultProductRepository(api, savedProductDao, recentlyViewedProductDao)
 
     @Provides
     @Singleton
