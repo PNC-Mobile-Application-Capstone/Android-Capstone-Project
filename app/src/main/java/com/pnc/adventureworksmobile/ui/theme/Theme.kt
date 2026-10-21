@@ -1,6 +1,5 @@
 package com.pnc.adventureworksmobile.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -11,33 +10,84 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+private val AdventureDarkColorScheme = darkColorScheme(
+    primary = AdventureGreenDarkTheme,
+    onPrimary = AdventureDarkBackground,
+    primaryContainer = AdventureGreenDarkContainer,
+    onPrimaryContainer = AdventureGreenDarkTheme,
+    secondary = AdventureOrangeDarkTheme,
+    onSecondary = AdventureDarkBackground,
+    secondaryContainer = AdventureOrangeDarkContainer,
+    onSecondaryContainer = AdventureOrangeDarkTheme,
+    background = AdventureDarkBackground,
+    surface = AdventureDarkSurface,
+    onBackground = AdventureDarkInk,
+    onSurface = AdventureDarkInk,
+    onSurfaceVariant = AdventureDarkMuted,
+    outline = AdventureDarkOutline,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val AdventureLightColorScheme = lightColorScheme(
+    primary = AdventureGreen,
+    onPrimary = AdventureSurface,
+    primaryContainer = AdventureGreenContainer,
+    onPrimaryContainer = AdventureInk,
+    secondary = AdventureOrange,
+    onSecondary = AdventureSurface,
+    secondaryContainer = AdventureOrangeContainer,
+    onSecondaryContainer = AdventureInk,
+    background = AdventureGroupedBackground,
+    surface = AdventureSurface,
+    onBackground = AdventureInk,
+    onSurface = AdventureInk,
+    onSurfaceVariant = AdventureMuted,
+    outline = AdventureOutline,
 )
+
+private val ModernPlainDarkColorScheme = darkColorScheme(
+    primary = ModernPlainDarkPrimary,
+    onPrimary = ModernPlainDarkBackground,
+    primaryContainer = ModernPlainDarkPrimaryContainer,
+    onPrimaryContainer = ModernPlainDarkInk,
+    secondary = ModernPlainDarkSecondary,
+    onSecondary = ModernPlainDarkBackground,
+    secondaryContainer = ModernPlainDarkSecondaryContainer,
+    onSecondaryContainer = ModernPlainDarkInk,
+    background = ModernPlainDarkBackground,
+    surface = ModernPlainDarkSurface,
+    onBackground = ModernPlainDarkInk,
+    onSurface = ModernPlainDarkInk,
+    onSurfaceVariant = ModernPlainDarkMuted,
+    outline = ModernPlainDarkOutline,
+)
+
+private val ModernPlainLightColorScheme = lightColorScheme(
+    primary = ModernPlainPrimary,
+    onPrimary = ModernPlainSurface,
+    primaryContainer = ModernPlainPrimaryContainer,
+    onPrimaryContainer = ModernPlainInk,
+    secondary = ModernPlainSecondary,
+    onSecondary = ModernPlainSurface,
+    secondaryContainer = ModernPlainSecondaryContainer,
+    onSecondaryContainer = ModernPlainInk,
+    background = ModernPlainBackground,
+    surface = ModernPlainSurface,
+    onBackground = ModernPlainInk,
+    onSurface = ModernPlainInk,
+    onSurfaceVariant = ModernPlainMuted,
+    outline = ModernPlainOutline,
+)
+
+// Swap palettes by commenting one pair and uncommenting the other.
+// private val ActiveDarkColorScheme = AdventureDarkColorScheme
+// private val ActiveLightColorScheme = AdventureLightColorScheme
+private val ActiveDarkColorScheme = ModernPlainDarkColorScheme
+private val ActiveLightColorScheme = ModernPlainLightColorScheme
 
 @Composable
 fun AdventureWorksMobileTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -46,13 +96,12 @@ fun AdventureWorksMobileTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> ActiveDarkColorScheme
+        else -> ActiveLightColorScheme
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
         content = content
     )
 }
