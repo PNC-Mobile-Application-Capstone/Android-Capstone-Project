@@ -110,6 +110,8 @@ private fun ProductDetailContent(
         ) {
             ProductImage(
                 imageBase64 = product.photoBase64,
+                imageFileName = product.photoFileName,
+                category = productCategory(product.name),
                 productName = product.name,
                 modifier = Modifier.padding(28.dp),
             )

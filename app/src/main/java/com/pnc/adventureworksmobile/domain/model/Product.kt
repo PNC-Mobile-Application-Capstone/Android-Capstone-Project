@@ -5,6 +5,7 @@ data class Product(
     val name: String,
     val productNumber: String,
     val thumbnailBase64: String?,
+    val thumbnailPhotoFileName: String?,
     val listPrice: Double,
 )
 
@@ -14,6 +15,7 @@ data class ProductDetails(
     val productNumber: String,
     val summary: String,
     val photoBase64: String?,
+    val photoFileName: String?,
     val color: String?,
     val listPrice: Double,
     val productLine: String?,
