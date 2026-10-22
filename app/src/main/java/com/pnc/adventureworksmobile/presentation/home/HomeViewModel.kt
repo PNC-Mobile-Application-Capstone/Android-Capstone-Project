@@ -60,6 +60,7 @@ data class ProductUiModel(
     val price: String,
     val listPrice: Double,
     val thumbnailBase64: String?,
+    val thumbnailPhotoFileName: String?,
     val isSaved: Boolean = false,
 )
 
@@ -73,6 +74,7 @@ internal fun Product.toUiModel(isSaved: Boolean = false): ProductUiModel {
         price = NumberFormat.getCurrencyInstance(Locale.US).format(listPrice),
         listPrice = listPrice,
         thumbnailBase64 = thumbnailBase64,
+        thumbnailPhotoFileName = thumbnailPhotoFileName,
         isSaved = isSaved,
     )
 }
