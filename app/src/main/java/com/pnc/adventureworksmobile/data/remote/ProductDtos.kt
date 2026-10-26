@@ -10,6 +10,7 @@ data class ProductListDto(
     val name: String? = null,
     val productNumber: String? = null,
     val thumbnailPhoto: String? = null,
+    val thumbnailPhotoFileName: String? = null,
     val listPrice: Double = 0.0,
 )
 
@@ -20,6 +21,7 @@ data class ProductDetailsDto(
     val productNumber: String? = null,
     val summary: String? = null,
     val photo: String? = null,
+    val photoFileName: String? = null,
     val color: String? = null,
     val listPrice: Double = 0.0,
     val productLine: String? = null,
@@ -38,6 +40,7 @@ fun ProductListDto.toDomain(): Product = Product(
     name = name.orEmpty().ifBlank { "Unnamed product" },
     productNumber = productNumber.orEmpty(),
     thumbnailBase64 = thumbnailPhoto,
+    thumbnailPhotoFileName = thumbnailPhotoFileName,
     listPrice = listPrice,
 )
 
@@ -47,6 +50,7 @@ fun ProductDetailsDto.toDomain(): ProductDetails = ProductDetails(
     productNumber = productNumber.orEmpty(),
     summary = summary.orEmpty(),
     photoBase64 = photo,
+    photoFileName = photoFileName,
     color = color,
     listPrice = listPrice,
     productLine = productLine,

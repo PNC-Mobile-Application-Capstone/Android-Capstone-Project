@@ -283,6 +283,8 @@ private fun ProductCard(
         ) {
             ProductImage(
                 imageBase64 = product.thumbnailBase64,
+                imageFileName = product.thumbnailPhotoFileName,
+                category = product.category,
                 productName = product.name,
                 modifier = Modifier
                     .fillMaxSize()
@@ -342,11 +344,15 @@ private fun ProductCard(
 @Composable
 internal fun ProductImage(
     imageBase64: String?,
+    imageFileName: String?,
+    category: String,
     productName: String,
     modifier: Modifier = Modifier,
 ) {
-    val imageBitmap = remember(imageBase64) {
-        imageBase64?.let { encoded ->
+    val currentImage = if (imageFileName?.startsWith("no_image_available") ?: true) defaultProductImage(category) else imageBase64
+
+    val imageBitmap = remember(currentImage) {
+        currentImage?.let { encoded ->
             runCatching {
                 val bytes = Base64.decode(encoded, Base64.DEFAULT)
                 BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
@@ -435,6 +441,7 @@ private fun HomeScreenPreview() {
                         price = "$1,299.00",
                         listPrice = 1299.0,
                         thumbnailBase64 = null,
+                        thumbnailPhotoFileName = "no_image_available_large.gif"
                     ),
                 ),
                 isLoading = false,
