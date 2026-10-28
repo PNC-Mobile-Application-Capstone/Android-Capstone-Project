@@ -6,8 +6,11 @@ import com.pnc.adventureworksmobile.BuildConfig
 import com.pnc.adventureworksmobile.data.local.AdventureWorksDatabase
 import com.pnc.adventureworksmobile.data.local.RecentlyViewedProductDao
 import com.pnc.adventureworksmobile.data.local.SavedProductDao
+import com.pnc.adventureworksmobile.data.remote.OrderApi
 import com.pnc.adventureworksmobile.data.remote.ProductApi
+import com.pnc.adventureworksmobile.data.repository.DefaultOrderRepository
 import com.pnc.adventureworksmobile.data.repository.DefaultProductRepository
+import com.pnc.adventureworksmobile.domain.repository.OrderRepository
 import com.pnc.adventureworksmobile.domain.repository.ProductRepository
 import dagger.Module
 import dagger.Provides
@@ -64,11 +67,21 @@ object ApplicationModule {
 
     @Provides
     @Singleton
+    fun provideOrderApi(retrofit: Retrofit): OrderApi = retrofit.create(OrderApi::class.java)
+
+    @Provides
+    @Singleton
     fun provideProductRepository(
         api: ProductApi,
         savedProductDao: SavedProductDao,
         recentlyViewedProductDao: RecentlyViewedProductDao,
     ): ProductRepository = DefaultProductRepository(api, savedProductDao, recentlyViewedProductDao)
+
+    @Provides
+    @Singleton
+    fun provideOrderRepository(
+        api: OrderApi,
+    ): OrderRepository = DefaultOrderRepository(api)
 
     @Provides
     @Singleton
