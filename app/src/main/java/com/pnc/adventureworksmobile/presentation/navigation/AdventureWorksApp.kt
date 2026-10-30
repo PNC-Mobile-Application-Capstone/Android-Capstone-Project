@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Storefront
+import androidx.compose.material.icons.outlined.WatchLater
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -45,6 +46,7 @@ enum class TopLevelDestination(
     Catalog(route = "catalog", title = "Catalog", icon = Icons.Outlined.Storefront),
     Orders(route = "orders", title = "Orders", icon = Icons.AutoMirrored.Outlined.ReceiptLong),
     Saved(route = "saved", title = "Saved", icon = Icons.Outlined.FavoriteBorder),
+    Recent(route = "recent", title = "Recently Viewed", icon = Icons.Outlined.WatchLater),
 }
 
 @Composable
@@ -134,6 +136,12 @@ fun AdventureWorksApp() {
                 EmptyDestination(
                     title = "Saved",
                     message = "Your saved products will appear here.",
+                )
+            }
+            composable(TopLevelDestination.Recent.route) {
+                EmptyDestination(
+                    title = "Recently Viewed",
+                    message = "Your recently viewed products will appear here.",
                 )
             }
         }
