@@ -1,4 +1,4 @@
-package com.pnc.adventureworksmobile.presentation.home
+package com.pnc.adventureworksmobile.presentation.shared
 
 import android.graphics.BitmapFactory
 import android.util.Base64
@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import com.pnc.adventureworksmobile.presentation.home.defaultProductImage
 
 @Composable
 fun ProductImage(
