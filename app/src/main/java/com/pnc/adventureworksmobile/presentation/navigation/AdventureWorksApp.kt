@@ -140,7 +140,7 @@ fun AdventureWorksApp() {
             }
             composable(TopLevelDestination.Recent.route) {
                 EmptyDestination(
-                    title = "Recent",
+                    title = "Recently Viewed",
                     message = "Your recently viewed products will appear here.",
                 )
             }
