@@ -54,8 +54,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,8 +64,8 @@ import com.pnc.adventureworksmobile.presentation.shared.ProductImage
 import com.pnc.adventureworksmobile.ui.theme.AdventureWorksMobileTheme
 
 @Composable
-fun HomeScreen(
-    uiState: HomeUiState,
+fun CatalogScreen(
+    uiState: CatalogUiState,
     onSearchQueryChange: (String) -> Unit,
     onCategorySelected: (String) -> Unit,
     onSortSelected: (ProductSort) -> Unit,
@@ -388,10 +386,10 @@ private fun EmptyCatalog(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun HomeScreenPreview() {
+private fun CatalogScreenPreview() {
     AdventureWorksMobileTheme(darkTheme = false) {
-        HomeScreen(
-            uiState = HomeUiState(
+        CatalogScreen(
+            uiState = CatalogUiState(
                 demoCustomer = DemoCustomer(id = 0, displayName = "Daniel Davis"),
                 products = listOf(
                     ProductUiModel(

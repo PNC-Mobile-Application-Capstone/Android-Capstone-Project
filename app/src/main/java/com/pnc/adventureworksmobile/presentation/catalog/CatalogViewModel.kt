@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class HomeUiState(
+data class CatalogUiState(
     val demoCustomer: DemoCustomer,
     val searchQuery: String = "",
     val selectedCategory: String = "All",
@@ -89,10 +89,10 @@ class HomeViewModel @Inject constructor(
     session: DemoCustomerSession,
     private val productRepository: ProductRepository,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(HomeUiState(demoCustomer = session.activeCustomer))
+    private val _uiState = MutableStateFlow(CatalogUiState(demoCustomer = session.activeCustomer))
     private var savedProductIds = emptySet<Int>()
 
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<CatalogUiState> = _uiState.asStateFlow()
 
     init {
         observeSavedProducts()
