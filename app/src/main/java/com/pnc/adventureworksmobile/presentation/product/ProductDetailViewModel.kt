@@ -1,4 +1,4 @@
-package com.pnc.adventureworksmobile.presentation.home
+package com.pnc.adventureworksmobile.presentation.product
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

@@ -35,8 +35,8 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.pnc.adventureworksmobile.presentation.home.HomeViewModel
 import com.pnc.adventureworksmobile.presentation.home.HomeScreen
-import com.pnc.adventureworksmobile.presentation.home.ProductDetailScreen
-import com.pnc.adventureworksmobile.presentation.home.ProductDetailViewModel
+import com.pnc.adventureworksmobile.presentation.product.ProductDetailScreen
+import com.pnc.adventureworksmobile.presentation.product.ProductDetailViewModel
 
 enum class TopLevelDestination(
     val route: String,
