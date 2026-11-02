@@ -45,6 +45,10 @@ import com.pnc.adventureworksmobile.presentation.home.CatalogScreen
 import com.pnc.adventureworksmobile.presentation.product.ProductDetailScreen
 import com.pnc.adventureworksmobile.presentation.product.ProductDetailViewModel
 import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedScreen
+import com.pnc.adventureworksmobile.presentation.orders.OrderDetailsScreen
+import com.pnc.adventureworksmobile.presentation.orders.OrderDetailsViewModel
+import com.pnc.adventureworksmobile.presentation.orders.OrdersScreen
+import com.pnc.adventureworksmobile.presentation.orders.OrdersViewModel
 
 enum class TopLevelDestination(
     val route: String,
