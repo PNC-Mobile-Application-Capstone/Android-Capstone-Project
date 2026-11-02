@@ -2,9 +2,6 @@ package com.pnc.adventureworksmobile.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
@@ -20,10 +17,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,11 +28,15 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.pnc.adventureworksmobile.presentation.home.HomeViewModel
+import com.pnc.adventureworksmobile.presentation.home.CatalogViewModel
 import com.pnc.adventureworksmobile.presentation.home.CatalogScreen
 import com.pnc.adventureworksmobile.presentation.product.ProductDetailScreen
 import com.pnc.adventureworksmobile.presentation.product.ProductDetailViewModel
 import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedScreen
+import com.pnc.adventureworksmobile.presentation.EmptyDestination
+import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedUiState
+import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedViewModel
+
 
 enum class TopLevelDestination(
     val route: String,
@@ -109,7 +108,7 @@ fun AdventureWorksApp() {
         ) {
 
             composable(TopLevelDestination.Catalog.route) {
-                val viewModel: HomeViewModel = hiltViewModel()
+                val viewModel: CatalogViewModel = hiltViewModel()
 
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -151,35 +150,13 @@ fun AdventureWorksApp() {
                 )
             }
             composable(TopLevelDestination.Recent.route) {
-                    EmptyDestination(
-                        title = "Recently Viewed Products",
-                        message = "Your saved products will appear here.",
-                    )
+                val viewModel: RecentlyViewedViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                RecentlyViewedScreen(
+                    uiState = uiState,
+                    onButtonClick = viewModel::onButtonClick
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun EmptyDestination(
-    title: String,
-    message: String,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = title,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = message,
-            modifier = Modifier.padding(top = 12.dp),
-            textAlign = TextAlign.Center,
-        )
     }
 }

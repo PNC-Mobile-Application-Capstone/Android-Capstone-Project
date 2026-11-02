@@ -80,12 +80,8 @@ internal fun Product.toUiModel(isSaved: Boolean = false): ProductUiModel {
     )
 }
 
-
-
-
-
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class CatalogViewModel @Inject constructor(
     session: DemoCustomerSession,
     private val productRepository: ProductRepository,
 ) : ViewModel() {
