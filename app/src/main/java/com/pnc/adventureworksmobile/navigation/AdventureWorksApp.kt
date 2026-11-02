@@ -34,10 +34,21 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.pnc.adventureworksmobile.presentation.home.HomeViewModel
+import com.pnc.adventureworksmobile.presentation.home.HomeScreen
+import com.pnc.adventureworksmobile.presentation.home.ProductDetailScreen
+import com.pnc.adventureworksmobile.presentation.home.ProductDetailViewModel
+import com.pnc.adventureworksmobile.presentation.orders.OrderDetailsScreen
+import com.pnc.adventureworksmobile.presentation.orders.OrderDetailsViewModel
+import com.pnc.adventureworksmobile.presentation.orders.OrdersScreen
+import com.pnc.adventureworksmobile.presentation.orders.OrdersViewModel
 import com.pnc.adventureworksmobile.presentation.home.CatalogScreen
 import com.pnc.adventureworksmobile.presentation.product.ProductDetailScreen
 import com.pnc.adventureworksmobile.presentation.product.ProductDetailViewModel
 import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedScreen
+import com.pnc.adventureworksmobile.presentation.orders.OrderDetailsScreen
+import com.pnc.adventureworksmobile.presentation.orders.OrderDetailsViewModel
+import com.pnc.adventureworksmobile.presentation.orders.OrdersScreen
+import com.pnc.adventureworksmobile.presentation.orders.OrdersViewModel
 
 enum class TopLevelDestination(
     val route: String,
@@ -129,9 +140,26 @@ fun AdventureWorksApp() {
                 )
             }
             composable(TopLevelDestination.Orders.route) {
-                EmptyDestination(
-                    title = "Orders",
-                    message = "Your orders will appear here.",
+                val viewModel: OrdersViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                OrdersScreen(
+                    uiState = uiState,
+                    onOrderClick = { orderId ->
+                        navController.navigate("order/$orderId")
+                    },
+                    onRetry = viewModel::loadOrders,
+                )
+            }
+            composable(
+                route = "order/{orderId}",
+                arguments = listOf(navArgument("orderId") { type = NavType.IntType }),
+            ) {
+                val viewModel: OrderDetailsViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                OrderDetailsScreen(
+                    uiState = uiState,
+                    onBack = navController::navigateUp,
+                    onRetry = viewModel::retry,
                 )
             }
             composable(TopLevelDestination.Saved.route) {
