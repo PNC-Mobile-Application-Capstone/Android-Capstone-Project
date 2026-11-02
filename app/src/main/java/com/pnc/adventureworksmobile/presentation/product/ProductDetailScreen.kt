@@ -1,4 +1,4 @@
-package com.pnc.adventureworksmobile.presentation.home
+package com.pnc.adventureworksmobile.presentation.product
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pnc.adventureworksmobile.domain.model.ProductDetails
+import com.pnc.adventureworksmobile.presentation.shared.ProductImage
+import com.pnc.adventureworksmobile.presentation.shared.productCategory
 import java.text.NumberFormat
 import java.util.Locale
 

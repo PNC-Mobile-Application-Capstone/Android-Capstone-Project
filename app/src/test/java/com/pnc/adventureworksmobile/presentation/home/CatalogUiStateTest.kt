@@ -5,7 +5,7 @@ import com.pnc.adventureworksmobile.domain.model.Product
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class HomeUiStateTest {
+class CatalogUiStateTest {
     private val customer = DemoCustomer(id = 11_711, displayName = "Daniel Davis")
     private val products = listOf(
         product(id = 1, name = "Trail Mountain Bike").toUiModel(),
@@ -15,7 +15,7 @@ class HomeUiStateTest {
 
     @Test
     fun categorySelectionFiltersProducts() {
-        val state = HomeUiState(
+        val state = CatalogUiState(
             demoCustomer = customer,
             selectedCategory = "Bikes",
             products = products,
@@ -26,7 +26,7 @@ class HomeUiStateTest {
 
     @Test
     fun searchMatchesProductNameIgnoringCase() {
-        val state = HomeUiState(
+        val state = CatalogUiState(
             demoCustomer = customer,
             searchQuery = "helmet",
             products = products,
@@ -37,7 +37,7 @@ class HomeUiStateTest {
 
     @Test
     fun searchAndCategoryMustBothMatch() {
-        val state = HomeUiState(
+        val state = CatalogUiState(
             demoCustomer = customer,
             searchQuery = "bike",
             selectedCategory = "Clothing",
@@ -49,7 +49,7 @@ class HomeUiStateTest {
 
     @Test
     fun priceAscendingSortsLowestPriceFirst() {
-        val state = HomeUiState(
+        val state = CatalogUiState(
             demoCustomer = customer,
             selectedSort = ProductSort.PriceAscending,
             products = listOf(
@@ -63,7 +63,7 @@ class HomeUiStateTest {
 
     @Test
     fun priceDescendingSortsHighestPriceFirst() {
-        val state = HomeUiState(
+        val state = CatalogUiState(
             demoCustomer = customer,
             selectedSort = ProductSort.PriceDescending,
             products = listOf(
@@ -77,7 +77,7 @@ class HomeUiStateTest {
 
     @Test
     fun searchAlsoMatchesProductNumber() {
-        val state = HomeUiState(
+        val state = CatalogUiState(
             demoCustomer = customer,
             searchQuery = "PN-2",
             products = products,

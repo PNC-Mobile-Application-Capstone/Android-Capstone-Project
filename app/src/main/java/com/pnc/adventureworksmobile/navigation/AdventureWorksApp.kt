@@ -1,4 +1,4 @@
-package com.pnc.adventureworksmobile.presentation.navigation
+package com.pnc.adventureworksmobile.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Storefront
+import androidx.compose.material.icons.outlined.WatchLater
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -33,9 +34,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.pnc.adventureworksmobile.presentation.home.HomeViewModel
-import com.pnc.adventureworksmobile.presentation.home.HomeScreen
-import com.pnc.adventureworksmobile.presentation.home.ProductDetailScreen
-import com.pnc.adventureworksmobile.presentation.home.ProductDetailViewModel
+import com.pnc.adventureworksmobile.presentation.home.CatalogScreen
+import com.pnc.adventureworksmobile.presentation.product.ProductDetailScreen
+import com.pnc.adventureworksmobile.presentation.product.ProductDetailViewModel
+import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedScreen
 
 enum class TopLevelDestination(
     val route: String,
@@ -45,6 +47,7 @@ enum class TopLevelDestination(
     Catalog(route = "catalog", title = "Catalog", icon = Icons.Outlined.Storefront),
     Orders(route = "orders", title = "Orders", icon = Icons.AutoMirrored.Outlined.ReceiptLong),
     Saved(route = "saved", title = "Saved", icon = Icons.Outlined.FavoriteBorder),
+    Recent(route = "recent", title = "Recent Products", icon = Icons.Outlined.WatchLater),
 }
 
 @Composable
@@ -104,6 +107,7 @@ fun AdventureWorksApp() {
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None },
         ) {
+
             composable(TopLevelDestination.Catalog.route) {
                 CatalogScreen(
                     onProductSelected = { productId ->
@@ -136,6 +140,12 @@ fun AdventureWorksApp() {
                     message = "Your saved products will appear here.",
                 )
             }
+            composable(TopLevelDestination.Recent.route) {
+                    EmptyDestination(
+                        title = "Recently Viewed Products",
+                        message = "Your saved products will appear here.",
+                    )
+            }
         }
     }
 }
@@ -147,7 +157,7 @@ private fun CatalogScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    HomeScreen(
+    CatalogScreen(
         uiState = uiState,
         onSearchQueryChange = viewModel::onSearchQueryChange,
         onCategorySelected = viewModel::onCategorySelected,
