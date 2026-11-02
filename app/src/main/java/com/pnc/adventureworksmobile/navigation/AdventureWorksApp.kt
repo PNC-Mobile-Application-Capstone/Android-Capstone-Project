@@ -112,10 +112,20 @@ fun AdventureWorksApp() {
         ) {
 
             composable(TopLevelDestination.Catalog.route) {
+                val viewModel: HomeViewModel = hiltViewModel()
+
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
                 CatalogScreen(
+                    uiState = uiState,
+                    onSearchQueryChange = viewModel::onSearchQueryChange,
+                    onCategorySelected = viewModel::onCategorySelected,
+                    onSortSelected = viewModel::onSortSelected,
+                    onRetry = viewModel::refresh,
                     onProductSelected = { productId ->
                         navController.navigate("product/$productId")
                     },
+                    onSavedToggle = viewModel::onSavedToggle,
                 )
             }
             composable(
@@ -168,24 +178,6 @@ fun AdventureWorksApp() {
             }
         }
     }
-}
-
-@Composable
-private fun CatalogScreen(
-    onProductSelected: (Int) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel(),
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    CatalogScreen(
-        uiState = uiState,
-        onSearchQueryChange = viewModel::onSearchQueryChange,
-        onCategorySelected = viewModel::onCategorySelected,
-        onSortSelected = viewModel::onSortSelected,
-        onRetry = viewModel::refresh,
-        onProductSelected = onProductSelected,
-        onSavedToggle = viewModel::onSavedToggle,
-    )
 }
 
 @Composable
