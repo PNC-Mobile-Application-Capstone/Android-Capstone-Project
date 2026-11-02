@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -125,7 +126,7 @@ private fun OrderDetailsContent(
         )
 
         Text(
-            text = "Placed on ${details.orderDate}",
+            text = "Placed on ${formatDate(details.orderDate)}",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -135,7 +136,9 @@ private fun OrderDetailsContent(
         // Product info
         Card(
             modifier = Modifier.fillMaxWidth(),
-        ) {
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+            ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = "Item Details",
@@ -174,7 +177,9 @@ private fun OrderDetailsContent(
         // Shipping & Summary
         Card(
             modifier = Modifier.fillMaxWidth(),
-        ) {
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+            ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = "Shipping & Costs",
@@ -182,7 +187,7 @@ private fun OrderDetailsContent(
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                details.shipDate?.let { DetailRow("Ship Date", it) }
+                details.shipDate?.let { DetailRow("Ship Date", formatDate(it)) }
                 details.shipMethodName?.let { DetailRow("Shipping Method", it) }
                 details.carrierTrackingNumber?.let { DetailRow("Tracking Number", it) }
                 DetailRow("Freight Amount", currencyFormatter.format(details.freight))
@@ -198,7 +203,9 @@ private fun OrderDetailsContent(
             Spacer(modifier = Modifier.height(16.dp))
             Card(
                 modifier = Modifier.fillMaxWidth(),
-            ) {
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = "Customer Info",
