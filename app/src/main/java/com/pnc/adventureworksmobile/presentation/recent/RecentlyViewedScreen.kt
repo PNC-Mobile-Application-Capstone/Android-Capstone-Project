@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.presentation.EmptyDestination
@@ -37,7 +35,6 @@ import com.pnc.adventureworksmobile.presentation.shared.ProductImage
 fun RecentlyViewedScreen(
     uiState: RecentlyViewedUiState,
     onProductSelected: (Int) -> Unit,
-    onRetry: () -> Unit,
 ) {
     when {
         uiState.isLoading -> Box(
@@ -47,25 +44,6 @@ fun RecentlyViewedScreen(
             contentAlignment = Alignment.Center,
         ) {
             CircularProgressIndicator()
-        }
-
-        uiState.errorMessage != null -> Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Text(
-                text = uiState.errorMessage,
-                textAlign = TextAlign.Center,
-            )
-            Button(
-                onClick = onRetry,
-                modifier = Modifier.padding(top = 16.dp),
-            ) {
-                Text("Try again")
-            }
         }
 
         uiState.products.isEmpty() -> EmptyDestination(

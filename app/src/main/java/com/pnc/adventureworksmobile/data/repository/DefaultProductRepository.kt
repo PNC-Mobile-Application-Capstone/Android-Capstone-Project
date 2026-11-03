@@ -1,7 +1,8 @@
 package com.pnc.adventureworksmobile.data.repository
 
 import com.pnc.adventureworksmobile.data.local.RecentlyViewedProductDao
-import com.pnc.adventureworksmobile.data.local.RecentlyViewedProductEntity
+import com.pnc.adventureworksmobile.data.local.toProduct
+import com.pnc.adventureworksmobile.data.local.toRecentlyViewedEntity
 import com.pnc.adventureworksmobile.data.local.SavedProductDao
 import com.pnc.adventureworksmobile.data.local.SavedProductEntity
 import com.pnc.adventureworksmobile.data.remote.ProductApi
@@ -41,22 +42,13 @@ class DefaultProductRepository(
         }
     }
 
-    override suspend fun recordRecentlyViewed(productId: Int) {
+    override suspend fun recordRecentlyViewed(product: ProductDetails) {
         recentlyViewedProductDao.record(
-            RecentlyViewedProductEntity(
-                productId = productId,
-                viewedAtEpochMillis = System.currentTimeMillis(),
-            ),
+            product.toRecentlyViewedEntity(viewedAtEpochMillis = System.currentTimeMillis()),
         )
         recentlyViewedProductDao.trimToLatestTen()
     }
 
-    override fun observeRecentlyViewedProducts(): Flow<Result<List<Product>>> =
-        recentlyViewedProductDao.observeAll().map { entries ->
-            runCatching {
-                if (entries.isEmpty()) return@runCatching emptyList()
-                val productsById = api.getProducts().map { it.toDomain() }.associateBy { it.id }
-                entries.mapNotNull { productsById[it.productId] }
-            }
-        }
+    override fun observeRecentlyViewedProducts(): Flow<List<Product>> =
+        recentlyViewedProductDao.observeAll().map { entries -> entries.map { it.toProduct() } }
 }

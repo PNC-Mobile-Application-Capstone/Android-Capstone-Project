@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.pnc.adventureworksmobile.BuildConfig
 import com.pnc.adventureworksmobile.data.local.AdventureWorksDatabase
+import com.pnc.adventureworksmobile.data.local.MIGRATION_1_2
 import com.pnc.adventureworksmobile.data.local.RecentlyViewedProductDao
 import com.pnc.adventureworksmobile.data.local.SavedProductDao
 import com.pnc.adventureworksmobile.data.remote.OrderApi
@@ -91,7 +92,9 @@ object ApplicationModule {
         context,
         AdventureWorksDatabase::class.java,
         "adventure-works.db",
-    ).build()
+    )
+        .addMigrations(MIGRATION_1_2)
+        .build()
 
     @Provides
     fun provideSavedProductDao(database: AdventureWorksDatabase): SavedProductDao =
