@@ -33,11 +33,18 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.pnc.adventureworksmobile.presentation.home.HomeViewModel
+import com.pnc.adventureworksmobile.presentation.home.CatalogViewModel
 import com.pnc.adventureworksmobile.presentation.home.CatalogScreen
 import com.pnc.adventureworksmobile.presentation.product.ProductDetailScreen
 import com.pnc.adventureworksmobile.presentation.product.ProductDetailViewModel
 import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedScreen
+import com.pnc.adventureworksmobile.presentation.EmptyDestination
+import com.pnc.adventureworksmobile.presentation.orders.OrderDetailsScreen
+import com.pnc.adventureworksmobile.presentation.orders.OrderDetailsViewModel
+import com.pnc.adventureworksmobile.presentation.orders.OrdersScreen
+import com.pnc.adventureworksmobile.presentation.orders.OrdersViewModel
+import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedViewModel
+
 
 enum class TopLevelDestination(
     val route: String,
@@ -109,7 +116,16 @@ fun AdventureWorksApp() {
         ) {
 
             composable(TopLevelDestination.Catalog.route) {
+                val viewModel: CatalogViewModel = hiltViewModel()
+
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
                 CatalogScreen(
+                    uiState = uiState,
+                    onSearchQueryChange = viewModel::onSearchQueryChange,
+                    onCategorySelected = viewModel::onCategorySelected,
+                    onSortSelected = viewModel::onSortSelected,
+                    onRetry = viewModel::refresh,
                     onProductSelected = { productId ->
                         navController.navigate("product/$productId")
                     },
@@ -129,9 +145,26 @@ fun AdventureWorksApp() {
                 )
             }
             composable(TopLevelDestination.Orders.route) {
-                EmptyDestination(
-                    title = "Orders",
-                    message = "Your orders will appear here.",
+                val viewModel: OrdersViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                OrdersScreen(
+                    uiState = uiState,
+                    onOrderClick = { orderId ->
+                        navController.navigate("order/$orderId")
+                    },
+                    onRetry = viewModel::loadOrders,
+                )
+            }
+            composable(
+                route = "order/{orderId}",
+                arguments = listOf(navArgument("orderId") { type = NavType.IntType }),
+            ) {
+                val viewModel: OrderDetailsViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                OrderDetailsScreen(
+                    uiState = uiState,
+                    onBack = navController::navigateUp,
+                    onRetry = viewModel::retry,
                 )
             }
             composable(TopLevelDestination.Saved.route) {
@@ -141,53 +174,15 @@ fun AdventureWorksApp() {
                 )
             }
             composable(TopLevelDestination.Recent.route) {
-                    EmptyDestination(
-                        title = "Recently Viewed Products",
-                        message = "Your saved products will appear here.",
-                    )
+                val viewModel: RecentlyViewedViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                RecentlyViewedScreen(
+                    uiState = uiState,
+                    onProductSelected = { productId ->
+                        navController.navigate("product/$productId")
+                    },
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun CatalogScreen(
-    onProductSelected: (Int) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel(),
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    CatalogScreen(
-        uiState = uiState,
-        onSearchQueryChange = viewModel::onSearchQueryChange,
-        onCategorySelected = viewModel::onCategorySelected,
-        onSortSelected = viewModel::onSortSelected,
-        onRetry = viewModel::refresh,
-        onProductSelected = onProductSelected,
-        onSavedToggle = viewModel::onSavedToggle,
-    )
-}
-
-@Composable
-private fun EmptyDestination(
-    title: String,
-    message: String,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = title,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = message,
-            modifier = Modifier.padding(top = 12.dp),
-            textAlign = TextAlign.Center,
-        )
     }
 }

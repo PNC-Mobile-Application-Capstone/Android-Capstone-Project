@@ -49,7 +49,7 @@ class ProductDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             productRepository.getProduct(productId)
                 .onSuccess { product ->
-                    productRepository.recordRecentlyViewed(productId)
+                    productRepository.recordRecentlyViewed(product)
                     _uiState.update { it.copy(isLoading = false, product = product) }
                 }
                 .onFailure {

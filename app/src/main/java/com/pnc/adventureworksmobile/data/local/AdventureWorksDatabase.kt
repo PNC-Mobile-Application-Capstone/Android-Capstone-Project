@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
         SavedProductEntity::class,
         RecentlyViewedProductEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class AdventureWorksDatabase : RoomDatabase() {
