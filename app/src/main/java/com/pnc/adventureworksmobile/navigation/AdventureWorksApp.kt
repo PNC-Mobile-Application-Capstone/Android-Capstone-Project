@@ -34,7 +34,6 @@ import com.pnc.adventureworksmobile.presentation.product.ProductDetailScreen
 import com.pnc.adventureworksmobile.presentation.product.ProductDetailViewModel
 import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedScreen
 import com.pnc.adventureworksmobile.presentation.EmptyDestination
-import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedUiState
 import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedViewModel
 
 
@@ -154,7 +153,10 @@ fun AdventureWorksApp() {
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 RecentlyViewedScreen(
                     uiState = uiState,
-                    onButtonClick = viewModel::onButtonClick
+                    onProductSelected = { productId ->
+                        navController.navigate("product/$productId")
+                    },
+                    onRetry = viewModel::retry,
                 )
             }
         }
