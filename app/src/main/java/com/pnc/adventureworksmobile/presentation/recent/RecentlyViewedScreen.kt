@@ -1,48 +1,43 @@
 package com.pnc.adventureworksmobile.presentation.recent
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.pnc.adventureworksmobile.domain.model.ProductDetails
+import com.pnc.adventureworksmobile.presentation.EmptyDestination
+import com.pnc.adventureworksmobile.presentation.home.ProductUiModel
 import com.pnc.adventureworksmobile.presentation.shared.ProductImage
-import com.pnc.adventureworksmobile.presentation.shared.productCategory
-import java.text.NumberFormat
-import java.util.Locale
 
 @Composable
 fun RecentlyViewedScreen(
     uiState: RecentlyViewedUiState,
-    onBack: () -> Unit,
+    onProductSelected: (Int) -> Unit,
     onRetry: () -> Unit,
-    onSavedToggle: () -> Unit,
 ) {
     when {
         uiState.isLoading -> Box(
@@ -53,174 +48,111 @@ fun RecentlyViewedScreen(
         ) {
             CircularProgressIndicator()
         }
-        uiState.product != null -> ProductDetailContent(
-            product = uiState.product,
-            isSaved = uiState.isSaved,
-            onBack = onBack,
-            onSavedToggle = onSavedToggle,
+
+        uiState.errorMessage != null -> Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = uiState.errorMessage,
+                textAlign = TextAlign.Center,
+            )
+            Button(
+                onClick = onRetry,
+                modifier = Modifier.padding(top = 16.dp),
+            ) {
+                Text("Try again")
+            }
+        }
+
+        uiState.products.isEmpty() -> EmptyDestination(
+            title = "Recently Viewed Products",
+            message = "Products you view will appear here.",
         )
-        else -> ProductDetailError(
-            message = uiState.errorMessage.orEmpty(),
-            onBack = onBack,
-            onRetry = onRetry,
-        )
+
+        else -> LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item {
+                Text(
+                    text = "Recently viewed",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            items(uiState.products, key = { it.id }) { product ->
+                RecentProductRow(
+                    product = product,
+                    onClick = { onProductSelected(product.id) },
+                )
+            }
+        }
     }
 }
 
 @Composable
-private fun ProductDetailContent(
-    product: ProductDetails,
-    isSaved: Boolean,
-    onBack: () -> Unit,
-    onSavedToggle: () -> Unit,
+private fun RecentProductRow(
+    product: ProductUiModel,
+    onClick: () -> Unit,
 ) {
-    Column(
+    Card(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
-            .padding(20.dp),
+            .fillMaxWidth()
+            .clickable(role = Role.Button, onClick = onClick),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = onBack) {
-                Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
-                Text("Back")
-            }
-            TextButton(onClick = onSavedToggle) {
-                Icon(
-                    imageVector = if (isSaved) {
-                        Icons.Outlined.Favorite
-                    } else {
-                        Icons.Outlined.FavoriteBorder
-                    },
-                    contentDescription = null,
-                )
-                Text(if (isSaved) "Saved" else "Save")
-            }
-        }
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(240.dp),
-            shape = RoundedCornerShape(20.dp),
-            color = MaterialTheme.colorScheme.surface,
-        ) {
-            ProductImage(
-                imageBase64 = product.photoBase64,
-                imageFileName = product.photoFileName,
-                category = productCategory(product.name),
-                productName = product.name,
-                modifier = Modifier.padding(28.dp),
-            )
-        }
-
-        Text(
-            text = product.productModelName ?: product.productNumber,
-            modifier = Modifier.padding(top = 22.dp),
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            text = product.name,
-            modifier = Modifier.padding(top = 6.dp),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            text = NumberFormat.getCurrencyInstance(Locale.US).format(product.listPrice),
-            modifier = Modifier.padding(top = 10.dp),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-        )
-
-        if (product.summary.isNotBlank()) {
-            DetailSection(title = "About", body = product.summary)
-        }
-
-        val specifications = listOfNotNull(
-            product.color?.let { "Color" to it },
-            product.material?.let { "Material" to it },
-            product.style?.let { "Style" to it },
-            product.productLine?.let { "Product line" to it },
-            product.riderExperience?.let { "Best for" to it },
-            product.manufacturer?.let { "Manufacturer" to it },
-        )
-        if (specifications.isNotEmpty()) {
-            Text(
-                text = "Details",
-                modifier = Modifier.padding(top = 24.dp, bottom = 8.dp),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-            )
-            specifications.forEach { (label, value) ->
-                Row(
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .background(Color.White, RoundedCornerShape(12.dp)),
+            ) {
+                ProductImage(
+                    imageBase64 = product.thumbnailBase64,
+                    imageFileName = product.thumbnailPhotoFileName,
+                    category = product.category,
+                    productName = product.name,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 5.dp),
-                ) {
-                    Text(
-                        text = label,
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(text = value, modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium)
-                }
+                        .fillMaxSize()
+                        .padding(8.dp),
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .weight(1f),
+            ) {
+                Text(
+                    text = product.category,
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = product.name,
+                    modifier = Modifier.padding(top = 4.dp),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = product.price,
+                    modifier = Modifier.padding(top = 4.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
             }
         }
-
-        product.warrantyDescription?.takeIf { it.isNotBlank() }?.let {
-            DetailSection(title = product.warrantyPeriod ?: "Warranty", body = it)
-        }
-        product.maintenanceDescription?.takeIf { it.isNotBlank() }?.let {
-            DetailSection(title = "Care", body = it)
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-    }
-}
-
-@Composable
-private fun DetailSection(title: String, body: String) {
-    Text(
-        text = title,
-        modifier = Modifier.padding(top = 24.dp, bottom = 6.dp),
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold,
-    )
-    Text(
-        text = body,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        style = MaterialTheme.typography.bodyLarge,
-    )
-}
-
-@Composable
-private fun ProductDetailError(
-    message: String,
-    onBack: () -> Unit,
-    onRetry: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(text = "Product unavailable", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-        Text(
-            text = message,
-            modifier = Modifier.padding(top = 8.dp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        Button(onClick = onRetry, modifier = Modifier.padding(top = 18.dp)) { Text("Try again") }
-        TextButton(onClick = onBack) { Text("Back to catalog") }
     }
 }

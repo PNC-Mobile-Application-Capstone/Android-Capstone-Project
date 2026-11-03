@@ -14,4 +14,6 @@ interface ProductRepository {
     suspend fun setSaved(productId: Int, saved: Boolean)
 
     suspend fun recordRecentlyViewed(productId: Int)
+
+    fun observeRecentlyViewedProducts(): Flow<Result<List<Product>>>
 }

@@ -50,4 +50,13 @@ class DefaultProductRepository(
         )
         recentlyViewedProductDao.trimToLatestTen()
     }
+
+    override fun observeRecentlyViewedProducts(): Flow<Result<List<Product>>> =
+        recentlyViewedProductDao.observeAll().map { entries ->
+            runCatching {
+                if (entries.isEmpty()) return@runCatching emptyList()
+                val productsById = api.getProducts().map { it.toDomain() }.associateBy { it.id }
+                entries.mapNotNull { productsById[it.productId] }
+            }
+        }
 }
