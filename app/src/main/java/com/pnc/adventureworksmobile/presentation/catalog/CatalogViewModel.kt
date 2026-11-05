@@ -86,6 +86,7 @@ class CatalogViewModel @Inject constructor(
     private val productRepository: ProductRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CatalogUiState(demoCustomer = session.activeCustomer))
+    private var catalogProductsById = emptyMap<Int, Product>()
     private var savedProductIds = emptySet<Int>()
 
     val uiState: StateFlow<CatalogUiState> = _uiState.asStateFlow()
@@ -110,7 +111,11 @@ class CatalogViewModel @Inject constructor(
     fun onSavedToggle(productId: Int) {
         val product = _uiState.value.products.firstOrNull { it.id == productId } ?: return
         viewModelScope.launch {
-            productRepository.setSaved(productId, saved = !product.isSaved)
+            if (product.isSaved) {
+                productRepository.removeSavedProduct(productId)
+            } else {
+                catalogProductsById[productId]?.let { productRepository.saveProduct(it) }
+            }
         }
     }
 
@@ -119,6 +124,7 @@ class CatalogViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = it.products.isEmpty(), errorMessage = null) }
             productRepository.getProducts()
                 .onSuccess { products ->
+                    catalogProductsById = products.associateBy { it.id }
                     _uiState.update { state ->
                         state.copy(
                             products = products.map { it.toUiModel(it.id in savedProductIds) },
@@ -140,7 +146,8 @@ class CatalogViewModel @Inject constructor(
 
     private fun observeSavedProducts() {
         viewModelScope.launch {
-            productRepository.observeSavedProductIds().collectLatest { ids ->
+            productRepository.observeSavedProducts().collectLatest { savedProducts ->
+                val ids = savedProducts.mapTo(mutableSetOf()) { it.id }
                 savedProductIds = ids
                 _uiState.update { state ->
                     state.copy(products = state.products.map { it.copy(isSaved = it.id in ids) })

@@ -38,12 +38,13 @@ import com.pnc.adventureworksmobile.presentation.home.CatalogScreen
 import com.pnc.adventureworksmobile.presentation.product.ProductDetailScreen
 import com.pnc.adventureworksmobile.presentation.product.ProductDetailViewModel
 import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedScreen
-import com.pnc.adventureworksmobile.presentation.EmptyDestination
 import com.pnc.adventureworksmobile.presentation.orders.OrderDetailsScreen
 import com.pnc.adventureworksmobile.presentation.orders.OrderDetailsViewModel
 import com.pnc.adventureworksmobile.presentation.orders.OrdersScreen
 import com.pnc.adventureworksmobile.presentation.orders.OrdersViewModel
 import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedViewModel
+import com.pnc.adventureworksmobile.presentation.saved.SavedScreen
+import com.pnc.adventureworksmobile.presentation.saved.SavedViewModel
 
 
 enum class TopLevelDestination(
@@ -126,6 +127,7 @@ fun AdventureWorksApp() {
                     onCategorySelected = viewModel::onCategorySelected,
                     onSortSelected = viewModel::onSortSelected,
                     onRetry = viewModel::refresh,
+                    onSavedToggle = viewModel::onSavedToggle,
                     onProductSelected = { productId ->
                         navController.navigate("product/$productId")
                     },
@@ -168,9 +170,15 @@ fun AdventureWorksApp() {
                 )
             }
             composable(TopLevelDestination.Saved.route) {
-                EmptyDestination(
-                    title = "Saved",
-                    message = "Your saved products will appear here.",
+                val viewModel: SavedViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                SavedScreen(
+                    uiState = uiState,
+                    onProductSelected = { productId ->
+                        navController.navigate("product/$productId")
+                    },
+                    onRemoveSaved = viewModel::removeSavedProduct,
+                    onRetry = viewModel::retry,
                 )
             }
             composable(TopLevelDestination.Recent.route) {

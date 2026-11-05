@@ -6,15 +6,16 @@ import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.domain.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class SavedUiState(
-    val savedProductIds: Set<Int> = emptySet(),
     val products: List<Product> = emptyList(),
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
@@ -26,67 +27,46 @@ class SavedViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SavedUiState())
     val uiState: StateFlow<SavedUiState> = _uiState.asStateFlow()
+    private var savedProductsJob: Job? = null
 
     init {
         observeSavedProducts()
     }
 
     fun retry() {
-        loadSavedProducts(_uiState.value.savedProductIds)
+        observeSavedProducts()
     }
 
     fun removeSavedProduct(productId: Int) {
         viewModelScope.launch {
-            productRepository.setSaved(
-                productId = productId,
-                saved = false,
-            )
+            productRepository.removeSavedProduct(productId)
         }
     }
 
     private fun observeSavedProducts() {
-        viewModelScope.launch {
-            productRepository.observeSavedProductIds().collectLatest { savedIds ->
-                _uiState.update { currentState ->
-                    currentState.copy(savedProductIds = savedIds)
-                }
-                loadSavedProducts(savedIds)
-            }
-        }
-    }
-
-    private fun loadSavedProducts(savedIds: Set<Int>) {
-        if (savedIds.isEmpty()) {
+        savedProductsJob?.cancel()
+        savedProductsJob = viewModelScope.launch {
             _uiState.update { currentState ->
-                currentState.copy(products = emptyList(), isLoading = false, errorMessage = null)
+                currentState.copy(
+                    isLoading = currentState.products.isEmpty(),
+                    errorMessage = null,
+                )
             }
-            return
-        }
-
-        viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(isLoading = true, errorMessage = null)
-            }
-
-            productRepository.getProducts()
-                .onSuccess { products ->
-                    val savedProducts = products.filter { product ->
-                        product.id in savedIds
-                    }
-
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            products = savedProducts,
-                            isLoading = false,
-                            errorMessage = null,
-                        )
-                    }
-                }
-                .onFailure {
+            productRepository.observeSavedProducts()
+                .catch {
                     _uiState.update { currentState ->
                         currentState.copy(
                             isLoading = false,
                             errorMessage = "We couldn't load your saved products. Please try again.",
+                        )
+                    }
+                }
+                .collectLatest { products ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            products = products,
+                            isLoading = false,
+                            errorMessage = null,
                         )
                     }
                 }

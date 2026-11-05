@@ -7,11 +7,12 @@ Android app for browsing Adventure Works products, viewing product details, and 
 - Product catalog loaded from the Adventure Works API
 - Search, category filters, and name or price sorting
 - Product detail screen
-- Saved-product and recently-viewed persistence with Room
+- Offline saved-product snapshots and recently-viewed persistence with Room
 - Light and dark Compose themes
 - Catalog, Orders, and Saved navigation
 
-The Orders and Saved screens currently show empty states. Their full lists have not been implemented yet.
+The Saved screen displays locally persisted products in most-recently-saved order and supports removal
+and navigation back to product details.
 
 ## Demo customer
 
@@ -43,6 +44,7 @@ From PowerShell at the repository root:
 ```powershell
 .\gradlew.bat assembleDebug
 .\gradlew.bat testDebugUnitTest
+.\gradlew.bat lintDebug
 ```
 
 The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
@@ -57,6 +59,12 @@ com.pnc.adventureworksmobile
 |-- data/repository    Repository implementation
 |-- di                 Hilt modules
 |-- domain             Product models and repository contract
-|-- presentation/home  Catalog and product details
-`-- presentation/navigation  App navigation
+|-- presentation       Catalog, product, orders, saved, and recent UI
+`-- navigation         App navigation
 ```
+
+## Known limitations
+
+- Saved products from database version 2 retain their IDs and show a temporary unavailable state until
+  the catalog next loads successfully and refreshes their cached product information.
+- Product details still require the API, even when the product summary is available offline.
