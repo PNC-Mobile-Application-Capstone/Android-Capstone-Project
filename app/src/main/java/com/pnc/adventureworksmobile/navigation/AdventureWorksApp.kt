@@ -55,7 +55,7 @@ enum class TopLevelDestination(
     Catalog(route = "catalog", title = "Catalog", icon = Icons.Outlined.Storefront),
     Orders(route = "orders", title = "Orders", icon = Icons.AutoMirrored.Outlined.ReceiptLong),
     Saved(route = "saved", title = "Saved", icon = Icons.Outlined.FavoriteBorder),
-    Recent(route = "recent", title = "Recent Products", icon = Icons.Outlined.WatchLater),
+    Recent(route = "recent", title = "Recents", icon = Icons.Outlined.WatchLater),
 }
 
 @Composable
