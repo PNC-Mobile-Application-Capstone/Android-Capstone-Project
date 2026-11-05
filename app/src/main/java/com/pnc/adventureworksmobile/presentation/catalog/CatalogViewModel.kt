@@ -6,6 +6,7 @@ import com.pnc.adventureworksmobile.core.session.DemoCustomer
 import com.pnc.adventureworksmobile.core.session.DemoCustomerSession
 import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.domain.repository.ProductRepository
+import com.pnc.adventureworksmobile.presentation.shared.productCategory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.NumberFormat
 import java.util.Locale
@@ -17,7 +18,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class HomeUiState(
+data class CatalogUiState(
     val demoCustomer: DemoCustomer,
     val searchQuery: String = "",
     val selectedCategory: String = "All",
@@ -60,6 +61,7 @@ data class ProductUiModel(
     val price: String,
     val listPrice: Double,
     val thumbnailBase64: String?,
+    val thumbnailPhotoFileName: String?,
     val isSaved: Boolean = false,
 )
 
@@ -73,35 +75,20 @@ internal fun Product.toUiModel(isSaved: Boolean = false): ProductUiModel {
         price = NumberFormat.getCurrencyInstance(Locale.US).format(listPrice),
         listPrice = listPrice,
         thumbnailBase64 = thumbnailBase64,
+        thumbnailPhotoFileName = thumbnailPhotoFileName,
         isSaved = isSaved,
     )
 }
 
-internal fun productCategory(productName: String): String {
-    val name = productName.lowercase(Locale.US)
-    return when {
-        name.containsAny("jersey", "shorts", "glove", "sock", "cap", "vest") -> "Clothing"
-        name.containsAny("frame", "fork", "wheel", "tire", "tube", "chain", "brake", "pedal") ->
-            "Components"
-        name.containsAny("helmet", "bottle", "wash", "lock", "pump", "light", "pack", "fender") ->
-            "Accessories"
-        name.contains("bike") || name.startsWith("mountain-") || name.startsWith("road-") ||
-            name.startsWith("touring-") -> "Bikes"
-        else -> "Accessories"
-    }
-}
-
-private fun String.containsAny(vararg terms: String): Boolean = terms.any(::contains)
-
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class CatalogViewModel @Inject constructor(
     session: DemoCustomerSession,
     private val productRepository: ProductRepository,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(HomeUiState(demoCustomer = session.activeCustomer))
+    private val _uiState = MutableStateFlow(CatalogUiState(demoCustomer = session.activeCustomer))
     private var savedProductIds = emptySet<Int>()
 
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<CatalogUiState> = _uiState.asStateFlow()
 
     init {
         observeSavedProducts()

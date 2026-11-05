@@ -1,10 +1,7 @@
 package com.pnc.adventureworksmobile.presentation.home
 
-import android.graphics.BitmapFactory
-import android.util.Base64
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,19 +54,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.core.session.DemoCustomer
+import com.pnc.adventureworksmobile.presentation.shared.ProductImage
 import com.pnc.adventureworksmobile.ui.theme.AdventureWorksMobileTheme
 
 @Composable
-fun HomeScreen(
-    uiState: HomeUiState,
+fun CatalogScreen(
+    uiState: CatalogUiState,
     onSearchQueryChange: (String) -> Unit,
     onCategorySelected: (String) -> Unit,
     onSortSelected: (ProductSort) -> Unit,
@@ -283,6 +279,8 @@ private fun ProductCard(
         ) {
             ProductImage(
                 imageBase64 = product.thumbnailBase64,
+                imageFileName = product.thumbnailPhotoFileName,
+                category = product.category,
                 productName = product.name,
                 modifier = Modifier
                     .fillMaxSize()
@@ -339,39 +337,6 @@ private fun ProductCard(
     }
 }
 
-@Composable
-internal fun ProductImage(
-    imageBase64: String?,
-    productName: String,
-    modifier: Modifier = Modifier,
-) {
-    val imageBitmap = remember(imageBase64) {
-        imageBase64?.let { encoded ->
-            runCatching {
-                val bytes = Base64.decode(encoded, Base64.DEFAULT)
-                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
-            }.getOrNull()
-        }
-    }
-
-    if (imageBitmap != null) {
-        Image(
-            bitmap = imageBitmap,
-            contentDescription = productName,
-            modifier = modifier,
-            contentScale = ContentScale.Fit,
-        )
-    } else {
-        Box(modifier = modifier, contentAlignment = Alignment.Center) {
-            Text(
-                text = "Image unavailable",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.labelMedium,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            )
-        }
-    }
-}
 
 @Composable
 private fun LoadingCatalog(modifier: Modifier = Modifier) {
@@ -421,10 +386,10 @@ private fun EmptyCatalog(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
-private fun HomeScreenPreview() {
+private fun CatalogScreenPreview() {
     AdventureWorksMobileTheme(darkTheme = false) {
-        HomeScreen(
-            uiState = HomeUiState(
+        CatalogScreen(
+            uiState = CatalogUiState(
                 demoCustomer = DemoCustomer(id = 0, displayName = "Daniel Davis"),
                 products = listOf(
                     ProductUiModel(
@@ -435,6 +400,7 @@ private fun HomeScreenPreview() {
                         price = "$1,299.00",
                         listPrice = 1299.0,
                         thumbnailBase64 = null,
+                        thumbnailPhotoFileName = "no_image_available_large.gif"
                     ),
                 ),
                 isLoading = false,

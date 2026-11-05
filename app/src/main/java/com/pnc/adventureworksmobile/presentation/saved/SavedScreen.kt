@@ -30,7 +30,8 @@ fun SavedScreen(
         when {
             uiState.isLoading -> {
                 Text(
-                    text = "Loading saved products...", modifier = Modifier.padding(top = 16.dp)
+                    text = "Loading saved products...",
+                    modifier = Modifier.padding(top = 16.dp),
                 )
             }
 
@@ -38,8 +39,7 @@ fun SavedScreen(
                 Text(
                     text = uiState.errorMessage,
                     modifier = Modifier.padding(top = 16.dp),
-
-                    )
+                )
             }
 
             uiState.products.isEmpty() -> {
@@ -52,10 +52,9 @@ fun SavedScreen(
             else -> {
                 Text(
                     text = "${uiState.products.size} saved products",
-                    modifier = Modifier.padding(top = 16.dp)
+                    modifier = Modifier.padding(top = 16.dp),
                 )
             }
         }
-
     }
 }

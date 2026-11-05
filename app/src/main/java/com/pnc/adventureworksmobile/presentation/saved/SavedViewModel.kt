@@ -1,6 +1,7 @@
 package com.pnc.adventureworksmobile.presentation.saved
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.domain.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,7 +9,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -51,7 +51,6 @@ class SavedViewModel @Inject constructor(
                     currentState.copy(savedProductIds = savedIds)
                 }
                 loadSavedProducts(savedIds)
-
             }
         }
     }
