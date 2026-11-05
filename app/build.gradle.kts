@@ -65,5 +65,6 @@ dependencies {
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
