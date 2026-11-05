@@ -2,6 +2,7 @@ package com.pnc.adventureworksmobile.presentation.home
 
 import com.pnc.adventureworksmobile.core.session.DemoCustomer
 import com.pnc.adventureworksmobile.domain.model.Product
+import com.pnc.adventureworksmobile.presentation.shared.productCategory
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -109,6 +110,7 @@ class CatalogUiStateTest {
         name = name,
         productNumber = "PN-$id",
         thumbnailBase64 = null,
+        thumbnailPhotoFileName = null,
         listPrice = price,
     )
 }

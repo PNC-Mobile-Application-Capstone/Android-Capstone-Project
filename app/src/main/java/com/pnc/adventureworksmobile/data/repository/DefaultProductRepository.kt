@@ -4,7 +4,7 @@ import com.pnc.adventureworksmobile.data.local.RecentlyViewedProductDao
 import com.pnc.adventureworksmobile.data.local.toProduct
 import com.pnc.adventureworksmobile.data.local.toRecentlyViewedEntity
 import com.pnc.adventureworksmobile.data.local.SavedProductDao
-import com.pnc.adventureworksmobile.data.local.SavedProductEntity
+import com.pnc.adventureworksmobile.data.local.toSavedProductEntity
 import com.pnc.adventureworksmobile.data.remote.ProductApi
 import com.pnc.adventureworksmobile.data.remote.toDomain
 import com.pnc.adventureworksmobile.domain.model.Product
@@ -19,27 +19,34 @@ class DefaultProductRepository(
     private val recentlyViewedProductDao: RecentlyViewedProductDao,
 ) : ProductRepository {
     override suspend fun getProducts(): Result<List<Product>> = runCatching {
-        api.getProducts().map { it.toDomain() }
+        api.getProducts().map { it.toDomain() }.also { products ->
+            val savedProductIds = savedProductDao.getSavedProductIds().toSet()
+            products.filter { it.id in savedProductIds }.forEach { product ->
+                savedProductDao.updateSnapshot(
+                    productId = product.id,
+                    name = product.name,
+                    productNumber = product.productNumber,
+                    listPrice = product.listPrice,
+                    thumbnailBase64 = product.thumbnailBase64,
+                    thumbnailPhotoFileName = product.thumbnailPhotoFileName,
+                )
+            }
+        }
     }
 
     override suspend fun getProduct(productId: Int): Result<ProductDetails> = runCatching {
         api.getProduct(productId).toDomain()
     }
 
-    override fun observeSavedProductIds(): Flow<Set<Int>> =
-        savedProductDao.observeAll().map { products -> products.mapTo(mutableSetOf()) { it.productId } }
+    override fun observeSavedProducts(): Flow<List<Product>> =
+        savedProductDao.observeAll().map { products -> products.map { it.toProduct() } }
 
-    override suspend fun setSaved(productId: Int, saved: Boolean) {
-        if (saved) {
-            savedProductDao.save(
-                SavedProductEntity(
-                    productId = productId,
-                    savedAtEpochMillis = System.currentTimeMillis(),
-                ),
-            )
-        } else {
-            savedProductDao.remove(productId)
-        }
+    override suspend fun saveProduct(product: Product) {
+        savedProductDao.save(product.toSavedProductEntity(System.currentTimeMillis()))
+    }
+
+    override suspend fun removeSavedProduct(productId: Int) {
+        savedProductDao.remove(productId)
     }
 
     override suspend fun recordRecentlyViewed(product: ProductDetails) {

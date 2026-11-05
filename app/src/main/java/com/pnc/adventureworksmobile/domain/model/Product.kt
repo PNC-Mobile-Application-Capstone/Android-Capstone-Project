@@ -28,3 +28,12 @@ data class ProductDetails(
     val warrantyDescription: String?,
     val maintenanceDescription: String?,
 )
+
+fun ProductDetails.toProductSummary() = Product(
+    id = id,
+    name = name,
+    productNumber = productNumber,
+    thumbnailBase64 = photoBase64,
+    thumbnailPhotoFileName = photoFileName,
+    listPrice = listPrice,
+)

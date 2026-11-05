@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pnc.adventureworksmobile.domain.model.ProductDetails
+import com.pnc.adventureworksmobile.domain.model.toProductSummary
 import com.pnc.adventureworksmobile.domain.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -39,8 +40,13 @@ class ProductDetailViewModel @Inject constructor(
     fun retry() = loadProduct()
 
     fun onSavedToggle() {
+        val product = _uiState.value.product ?: return
         viewModelScope.launch {
-            productRepository.setSaved(productId, saved = !_uiState.value.isSaved)
+            if (_uiState.value.isSaved) {
+                productRepository.removeSavedProduct(productId)
+            } else {
+                productRepository.saveProduct(product.toProductSummary())
+            }
         }
     }
 
@@ -65,7 +71,8 @@ class ProductDetailViewModel @Inject constructor(
 
     private fun observeSavedState() {
         viewModelScope.launch {
-            productRepository.observeSavedProductIds().collectLatest { ids ->
+            productRepository.observeSavedProducts().collectLatest { products ->
+                val ids = products.mapTo(mutableSetOf()) { it.id }
                 _uiState.update { it.copy(isSaved = productId in ids) }
             }
         }
