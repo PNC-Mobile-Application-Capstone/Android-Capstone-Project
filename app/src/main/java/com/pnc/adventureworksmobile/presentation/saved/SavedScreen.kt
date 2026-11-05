@@ -27,13 +27,35 @@ fun SavedScreen(
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
         )
-        /*
-        Text(
-            text = "",
-            modifier = Modifier.padding(top = 16.dp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        */
+        when {
+            uiState.isLoading -> {
+                Text(
+                    text = "Loading saved products...", modifier = Modifier.padding(top = 16.dp)
+                )
+            }
+
+            uiState.errorMessage != null -> {
+                Text(
+                    text = uiState.errorMessage,
+                    modifier = Modifier.padding(top = 16.dp),
+
+                    )
+            }
+
+            uiState.products.isEmpty() -> {
+                Text(
+                    text = "No saved products yet.",
+                    modifier = Modifier.padding(top = 16.dp),
+                )
+            }
+
+            else -> {
+                Text(
+                    text = "${uiState.products.size} saved products",
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
+        }
 
     }
 }

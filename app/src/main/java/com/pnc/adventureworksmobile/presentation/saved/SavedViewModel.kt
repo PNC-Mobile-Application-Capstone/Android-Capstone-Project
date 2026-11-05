@@ -32,17 +32,23 @@ class SavedViewModel @Inject constructor(
     }
 
     fun retry() {
-
+        loadSavedProducts(_uiState.value.savedProductIds)
     }
 
     fun removeSavedProduct(productId: Int) {
-
+        viewModelScope.launch {
+            productRepository.setSaved(
+                productId = productId,
+                saved = false,
+            )
+        }
     }
 
     private fun observeSavedProducts() {
         viewModelScope.launch {
-            productRepository.observeSavedProductIds().collectLatest { savedIds -> _uiState.update { currentState ->
-                currentState.copy(savedProductIds = savedIds)
+            productRepository.observeSavedProductIds().collectLatest { savedIds ->
+                _uiState.update { currentState ->
+                    currentState.copy(savedProductIds = savedIds)
                 }
                 loadSavedProducts(savedIds)
 
@@ -58,13 +64,33 @@ class SavedViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch{
+        viewModelScope.launch {
             _uiState.update { currentState ->
                 currentState.copy(isLoading = true, errorMessage = null)
             }
+
+            productRepository.getProducts()
+                .onSuccess { products ->
+                    val savedProducts = products.filter { product ->
+                        product.id in savedIds
+                    }
+
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            products = savedProducts,
+                            isLoading = false,
+                            errorMessage = null,
+                        )
+                    }
+                }
+                .onFailure {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            isLoading = false,
+                            errorMessage = "We couldn't load your saved products. Please try again.",
+                        )
+                    }
+                }
         }
-
-        //left off here
-
     }
 }
