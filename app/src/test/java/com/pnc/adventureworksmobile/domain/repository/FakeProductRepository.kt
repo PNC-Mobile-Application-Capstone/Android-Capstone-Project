@@ -11,14 +11,15 @@ class FakeProductRepository : ProductRepository {
     var productsResult: Result<List<Product>> = Result.success(emptyList())
     var productDetailsResult: Result<ProductDetails> = Result.success(aProductDetails())
 
-    val savedIds = MutableStateFlow<Set<Int>>(emptySet())
+    val savedProducts = MutableStateFlow<List<Product>>(emptyList())
     val recentlyViewed = MutableStateFlow<List<Product>>(emptyList())
 
     var getProductsCalls = 0
         private set
     var lastProductId: Int? = null
         private set
-    val setSavedCalls = mutableListOf<Pair<Int, Boolean>>()
+    val savedCalls = mutableListOf<Product>()
+    val removedIds = mutableListOf<Int>()
     val recordedViews = mutableListOf<ProductDetails>()
 
     override suspend fun getProducts(): Result<List<Product>> {
@@ -31,11 +32,16 @@ class FakeProductRepository : ProductRepository {
         return productDetailsResult
     }
 
-    override fun observeSavedProductIds(): Flow<Set<Int>> = savedIds
+    override fun observeSavedProducts(): Flow<List<Product>> = savedProducts
 
-    override suspend fun setSaved(productId: Int, saved: Boolean) {
-        setSavedCalls += productId to saved
-        savedIds.value = if (saved) savedIds.value + productId else savedIds.value - productId
+    override suspend fun saveProduct(product: Product) {
+        savedCalls += product
+        savedProducts.value = savedProducts.value.filterNot { it.id == product.id } + product
+    }
+
+    override suspend fun removeSavedProduct(productId: Int) {
+        removedIds += productId
+        savedProducts.value = savedProducts.value.filterNot { it.id == productId }
     }
 
     override suspend fun recordRecentlyViewed(product: ProductDetails) {

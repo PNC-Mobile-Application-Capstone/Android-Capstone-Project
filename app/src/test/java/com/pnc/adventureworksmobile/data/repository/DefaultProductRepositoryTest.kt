@@ -1,5 +1,7 @@
 package com.pnc.adventureworksmobile.data.repository
 
+import com.pnc.adventureworksmobile.testutil.builders.aProduct
+
 import app.cash.turbine.test
 import com.pnc.adventureworksmobile.data.local.FakeRecentlyViewedProductDao
 import com.pnc.adventureworksmobile.data.local.FakeSavedProductDao
@@ -29,17 +31,25 @@ class DefaultProductRepositoryTest {
     private val recentDao = FakeRecentlyViewedProductDao()
     private val repository = DefaultProductRepository(api, savedDao, recentDao)
 
-    private fun savedRow(productId: Int) =
-        SavedProductEntity(productId = productId, savedAtEpochMillis = 1000L)
+    private fun savedRow(productId: Int, name: String = "Product $productId", listPrice: Double = 10.0) =
+        SavedProductEntity(
+            productId = productId,
+            savedAtEpochMillis = 1_000L,
+            name = name,
+            productNumber = "PN-$productId",
+            listPrice = listPrice,
+            thumbnailBase64 = null,
+            thumbnailPhotoFileName = null,
+        )
 
-    private fun recentRow(productId: Int, viewedAt: Long = 1000L) = RecentlyViewedProductEntity(
+    private fun recentRow(productId: Int, viewedAt: Long = 1_000L) = RecentlyViewedProductEntity(
         productId = productId,
         viewedAtEpochMillis = viewedAt,
         name = "Product $productId",
         productNumber = "PN-$productId",
         listPrice = 10.0,
         photoBase64 = null,
-        photoFileName = null
+        photoFileName = null,
     )
 
     // getProducts
@@ -72,6 +82,29 @@ class DefaultProductRepositoryTest {
         assertTrue(result.exceptionOrNull() is IOException)
     }
 
+    @Test
+    fun `getProducts refreshes the snapshot of products that are saved`() = runTest {
+        savedDao.saved.value = listOf(savedRow(749, name = "Old name", listPrice = 1.0))
+        api.products = listOf(aProductListDto(productId = 749, name = "New name", listPrice = 99.0))
+
+        repository.getProducts()
+
+        val row = savedDao.saved.value.single()
+        assertEquals("New name", row.name)
+        assertEquals(99.0, row.listPrice, 0.0)
+        assertEquals(1_000L, row.savedAtEpochMillis)   // keeps when it was originally saved
+    }
+
+    @Test
+    fun `getProducts does not save products that were not already saved`() = runTest {
+        savedDao.saved.value = listOf(savedRow(749))
+        api.products = listOf(aProductListDto(productId = 749), aProductListDto(productId = 750))
+
+        repository.getProducts()
+
+        assertEquals(listOf(749), savedDao.saved.value.map { it.productId })
+    }
+
 
     // getProduct
     @Test
@@ -83,8 +116,7 @@ class DefaultProductRepositoryTest {
 
     @Test
     fun `getProduct returns the mapped details`() = runTest {
-        api.productDetails =
-            aProductDetailsDto(productId = 749, productName = "Road-150 Red, 62")
+        api.productDetails = aProductDetailsDto(productId = 749, productName = "Road-150 Red, 62")
 
         val details = repository.getProduct(productId = 749).getOrThrow()
 
@@ -104,17 +136,26 @@ class DefaultProductRepositoryTest {
 
     // setSaved
     @Test
-    fun `saving a product stores its id`() = runTest {
-        repository.setSaved(productId = 749, saved = true)
+    fun `saving a product stores a snapshot of it`() = runTest {
+        val product = aProduct(
+            id = 749,
+            name = "Road-150 Red, 62",
+            productNumber = "BK-R93R-62",
+            listPrice = 3578.27,
+            thumbnailBase64 = "thumbnail-base64",
+            thumbnailPhotoFileName = "road150.gif",
+        )
 
-        assertEquals(listOf(749), savedDao.saved.value.map { it.productId })
+        repository.saveProduct(product)
+
+        assertEquals(product, savedDao.saved.value.single().toProduct())
     }
 
     @Test
     fun `saving a product stamps it with the current time`() = runTest {
         val before = System.currentTimeMillis()
 
-        repository.setSaved(productId = 749, saved = true)
+        repository.saveProduct(aProduct(id = 749))
 
         val after = System.currentTimeMillis()
         val stamp = savedDao.saved.value.single().savedAtEpochMillis
@@ -122,25 +163,32 @@ class DefaultProductRepositoryTest {
     }
 
     @Test
-    fun `unsaving a product removes only that product`() = runTest {
-        savedDao.saved.value = listOf(
-            SavedProductEntity(productId = 749, savedAtEpochMillis = 1000L),
-            SavedProductEntity(productId = 750, savedAtEpochMillis = 2000L),
-        )
-        repository.setSaved(productId = 749, saved = false)
+    fun `removing a saved product removes only that product`() = runTest {
+        savedDao.saved.value = listOf(savedRow(749), savedRow(750))
+
+        repository.removeSavedProduct(749)
 
         assertEquals(listOf(750), savedDao.saved.value.map { it.productId })
     }
 
     @Test
-    fun `unsaving a product that is not saved changes nothing`() = runTest {
-        savedDao.saved.value = listOf(
-            SavedProductEntity(productId = 749, savedAtEpochMillis = 1000L),
-            SavedProductEntity(productId = 750, savedAtEpochMillis = 2000L),
-        )
-        repository.setSaved(productId = 751, saved = false)
+    fun `removing a product that is not saved changes nothing`() = runTest {
+        savedDao.saved.value = listOf(savedRow(749), savedRow(750))
+
+        repository.removeSavedProduct(751)
 
         assertEquals(listOf(749, 750), savedDao.saved.value.map { it.productId })
+    }
+
+    @Test
+    fun `saving and removing a product does not touch the recently viewed history`() = runTest {
+        recentDao.recent.value = listOf(recentRow(99))
+
+        repository.saveProduct(aProduct(id = 1))
+        repository.removeSavedProduct(1)
+
+        assertEquals(listOf(recentRow(99)), recentDao.recent.value)
+        assertTrue(recentDao.calls.isEmpty())
     }
 
 
@@ -148,11 +196,7 @@ class DefaultProductRepositoryTest {
 
     @Test
     fun `recording a view stores the product`() = runTest {
-        val details = aProductDetails(
-            id = 749,
-            name = "Road-150 Red, 62",
-            listPrice = 3578.27,
-        )
+        val details = aProductDetails(id = 749, name = "Road-150 Red, 62", listPrice = 3578.27)
 
         repository.recordRecentlyViewed(details)
 
@@ -183,36 +227,45 @@ class DefaultProductRepositoryTest {
 
     // observeSavedProductIds
     @Test
-    fun `saved ids start out empty`() = runTest {
-        repository.observeSavedProductIds().test {
-            assertEquals(emptySet<Int>(), awaitItem())
+    fun `saved products start out empty`() = runTest {
+        repository.observeSavedProducts().test {
+            assertTrue(awaitItem().isEmpty())
         }
     }
 
     @Test
-    fun `saved ids are the product ids from the DAO`() = runTest {
-        savedDao.saved.value = listOf(savedRow(749), savedRow(750))
+    fun `saved rows come back as products in the DAO's order`() = runTest {
+        savedDao.saved.value = listOf(savedRow(750), savedRow(749))
 
-        repository.observeSavedProductIds().test {
-            assertEquals(setOf(749, 750), awaitItem())
+        repository.observeSavedProducts().test {
+            assertEquals(listOf(750, 749), awaitItem().map { it.id })
         }
     }
 
     @Test
-    fun `saving and unsaving a product updates the saved ids`() = runTest {
-        repository.observeSavedProductIds().test {
-            assertEquals(emptySet<Int>(), awaitItem())
+    fun `a saved row with a blank name shows as Saved product`() = runTest {
+        savedDao.saved.value = listOf(savedRow(749, name = ""))
 
-            repository.setSaved(productId = 749, saved = true)
-            assertEquals(setOf(749), awaitItem())
-
-            repository.setSaved(productId = 749, saved = false)
-            assertEquals(emptySet<Int>(), awaitItem())
+        repository.observeSavedProducts().test {
+            assertEquals("Saved product", awaitItem().single().name)
         }
     }
 
     @Test
-    fun `a DAO error is passed through to the saved ids`() = runTest {
+    fun `saving and removing a product updates the saved products`() = runTest {
+        repository.observeSavedProducts().test {
+            assertTrue(awaitItem().isEmpty())
+
+            repository.saveProduct(aProduct(id = 749))
+            assertEquals(listOf(749), awaitItem().map { it.id })
+
+            repository.removeSavedProduct(749)
+            assertTrue(awaitItem().isEmpty())
+        }
+    }
+
+    @Test
+    fun `a DAO error is passed through to the saved products`() = runTest {
         val failingDao = object : SavedProductDao by FakeSavedProductDao() {
             override fun observeAll(): Flow<List<SavedProductEntity>> = flow {
                 emit(listOf(savedRow(749)))
@@ -221,8 +274,8 @@ class DefaultProductRepositoryTest {
         }
         val failingRepository = DefaultProductRepository(api, failingDao, recentDao)
 
-        failingRepository.observeSavedProductIds().test {
-            assertEquals(setOf(749), awaitItem())
+        failingRepository.observeSavedProducts().test {
+            assertEquals(listOf(749), awaitItem().map { it.id })
             assertEquals("db closed", awaitError().message)
         }
     }
@@ -274,6 +327,4 @@ class DefaultProductRepositoryTest {
             awaitComplete()
         }
     }
-
-
 }

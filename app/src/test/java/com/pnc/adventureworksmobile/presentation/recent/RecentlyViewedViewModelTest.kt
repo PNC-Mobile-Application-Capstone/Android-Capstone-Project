@@ -81,7 +81,7 @@ class RecentlyViewedViewModelTest {
 
     @Test
     fun `recently viewed products are never shown as saved`() = runTest {
-        repository.savedIds.value = setOf(749)
+        repository.savedProducts.value = listOf(aProduct(id = 749))
         repository.recentlyViewed.value = listOf(aProduct(id = 749))
 
         val viewModel = createViewModel()

@@ -99,7 +99,7 @@ class CatalogViewModelTest {
 
     @Test
     fun `products saved before the catalog loads are marked saved`() = runTest {
-        repository.savedIds.value = setOf(749)
+        repository.savedProducts.value = listOf(aProduct(id = 749))
         repository.productsResult = Result.success(listOf(aProduct(id = 749), aProduct(id = 750)))
 
         val viewModel = createViewModel()
@@ -117,7 +117,7 @@ class CatalogViewModelTest {
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        repository.savedIds.value = setOf(749)
+        repository.savedProducts.value = listOf(aProduct(id = 749))
         advanceUntilIdle()
 
         assertTrue(viewModel.uiState.value.products.single().isSaved)
@@ -155,16 +155,31 @@ class CatalogViewModelTest {
     }
 
     @Test
-    fun `toggling a product saves it and marks it in the list`() = runTest {
-        repository.productsResult = Result.success(listOf(aProduct(id = 749)))
+    fun `toggling a product saves the full catalog product and marks it in the list`() = runTest {
+        val product = aProduct(id = 749, name = "Road-150 Red, 62")
+        repository.productsResult = Result.success(listOf(product))
         val viewModel = createViewModel()
         advanceUntilIdle()
 
         viewModel.onSavedToggle(749)
         advanceUntilIdle()
 
-        assertEquals(listOf(749 to true), repository.setSavedCalls)
+        assertEquals(listOf(product), repository.savedCalls)
         assertTrue(viewModel.uiState.value.products.single().isSaved)
+    }
+
+    @Test
+    fun `toggling a saved product removes it`() = runTest {
+        repository.productsResult = Result.success(listOf(aProduct(id = 749)))
+        repository.savedProducts.value = listOf(aProduct(id = 749))
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.onSavedToggle(749)
+        advanceUntilIdle()
+
+        assertEquals(listOf(749), repository.removedIds)
+        assertFalse(viewModel.uiState.value.products.single().isSaved)
     }
 
     @Test
@@ -176,6 +191,7 @@ class CatalogViewModelTest {
         viewModel.onSavedToggle(999)
         advanceUntilIdle()
 
-        assertTrue(repository.setSavedCalls.isEmpty())
+        assertTrue(repository.savedCalls.isEmpty())
+        assertTrue(repository.removedIds.isEmpty())
     }
 }

@@ -71,7 +71,7 @@ fun CatalogScreen(
     onSortSelected: (ProductSort) -> Unit,
     onRetry: () -> Unit,
     onProductSelected: (Int) -> Unit = {},
-    onSavedToggle: (Int) -> Unit = {},
+    onSavedToggle: (Int) -> Unit,
 ) {
     val productGridState = rememberLazyGridState()
 
@@ -409,6 +409,7 @@ private fun CatalogScreenPreview() {
             onCategorySelected = {},
             onSortSelected = {},
             onRetry = {},
+            onSavedToggle = {},
         )
     }
 }

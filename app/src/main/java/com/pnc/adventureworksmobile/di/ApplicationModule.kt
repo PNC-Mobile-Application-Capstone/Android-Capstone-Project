@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.pnc.adventureworksmobile.BuildConfig
 import com.pnc.adventureworksmobile.data.local.AdventureWorksDatabase
 import com.pnc.adventureworksmobile.data.local.MIGRATION_1_2
+import com.pnc.adventureworksmobile.data.local.MIGRATION_2_3
 import com.pnc.adventureworksmobile.data.local.RecentlyViewedProductDao
 import com.pnc.adventureworksmobile.data.local.SavedProductDao
 import com.pnc.adventureworksmobile.data.remote.OrderApi
@@ -93,7 +94,7 @@ object ApplicationModule {
         AdventureWorksDatabase::class.java,
         "adventure-works.db",
     )
-        .addMigrations(MIGRATION_1_2)
+        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
         .build()
 
     @Provides

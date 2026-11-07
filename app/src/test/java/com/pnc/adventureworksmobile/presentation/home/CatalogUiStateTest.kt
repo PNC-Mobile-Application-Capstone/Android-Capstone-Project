@@ -110,7 +110,7 @@ class CatalogUiStateTest {
         name = name,
         productNumber = "PN-$id",
         thumbnailBase64 = null,
-        listPrice = price,
-        thumbnailPhotoFileName = null
+        thumbnailPhotoFileName = null,
+        listPrice = price
     )
 }

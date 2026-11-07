@@ -14,6 +14,8 @@ import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
+import com.pnc.adventureworksmobile.domain.model.toProductSummary
+import com.pnc.adventureworksmobile.testutil.builders.aProduct
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProductDetailViewModelTest {
@@ -114,7 +116,7 @@ class ProductDetailViewModelTest {
 
     @Test
     fun `shows saved when the product is already saved`() = runTest {
-        repository.savedIds.value = setOf(749)
+        repository.savedProducts.value = listOf(aProduct(id = 749))
 
         val viewModel = createViewModel(productId = 749)
         advanceUntilIdle()
@@ -124,7 +126,7 @@ class ProductDetailViewModelTest {
 
     @Test
     fun `saving a different product does not mark this one`() = runTest {
-        repository.savedIds.value = setOf(750)
+        repository.savedProducts.value = listOf(aProduct(id = 750))
 
         val viewModel = createViewModel(productId = 749)
         advanceUntilIdle()
@@ -133,42 +135,58 @@ class ProductDetailViewModelTest {
     }
 
     @Test
-    fun `isSaved follows changes to the saved ids`() = runTest {
+    fun `isSaved follows changes to the saved products`() = runTest {
         val viewModel = createViewModel(productId = 749)
         advanceUntilIdle()
 
-        repository.savedIds.value = setOf(749)
+        repository.savedProducts.value = listOf(aProduct(id = 749))
         advanceUntilIdle()
         assertTrue(viewModel.uiState.value.isSaved)
 
-        repository.savedIds.value = emptySet()
+        repository.savedProducts.value = emptyList()
         advanceUntilIdle()
         assertFalse(viewModel.uiState.value.isSaved)
     }
 
     @Test
     fun `toggling an unsaved product saves it`() = runTest {
+        val details = aProductDetails(id = 749, name = "Road-150 Red, 62")
+        repository.productDetailsResult = Result.success(details)
         val viewModel = createViewModel(productId = 749)
         advanceUntilIdle()
 
         viewModel.onSavedToggle()
         advanceUntilIdle()
 
-        assertEquals(listOf(749 to true), repository.setSavedCalls)
+        assertEquals(listOf(details.toProductSummary()), repository.savedCalls)
         assertTrue(viewModel.uiState.value.isSaved)
     }
 
     @Test
-    fun `toggling a saved product unsaves it`() = runTest {
-        repository.savedIds.value = setOf(749)
+    fun `toggling a saved product removes it`() = runTest {
+        repository.productDetailsResult = Result.success(aProductDetails(id = 749))
+        repository.savedProducts.value = listOf(aProduct(id = 749))
         val viewModel = createViewModel(productId = 749)
         advanceUntilIdle()
 
         viewModel.onSavedToggle()
         advanceUntilIdle()
 
-        assertEquals(listOf(749 to false), repository.setSavedCalls)
+        assertEquals(listOf(749), repository.removedIds)
         assertFalse(viewModel.uiState.value.isSaved)
+    }
+
+    @Test
+    fun `toggling before the product has loaded does nothing`() = runTest {
+        repository.productDetailsResult = Result.failure(IOException("network down"))
+        val viewModel = createViewModel(productId = 749)
+        advanceUntilIdle()
+
+        viewModel.onSavedToggle()
+        advanceUntilIdle()
+
+        assertTrue(repository.savedCalls.isEmpty())
+        assertTrue(repository.removedIds.isEmpty())
     }
 
     @Test
