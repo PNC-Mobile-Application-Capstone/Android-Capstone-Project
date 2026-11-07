@@ -22,7 +22,6 @@ class OrderDetailsViewModelTest {
 
     private val repository = FakeOrderRepository()
 
-    // builds the saved state Android would hand the view model after navigating to order/{orderId}
     private fun createViewModel(orderId: Int = 43_659) = OrderDetailsViewModel(
         savedStateHandle = SavedStateHandle(mapOf("orderId" to orderId)),
         orderRepository = repository,
