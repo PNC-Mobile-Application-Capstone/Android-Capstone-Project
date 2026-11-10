@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.domain.model.Order
+import com.pnc.adventureworksmobile.domain.model.OrderLine
 
 @Composable
 fun OrdersScreen(
@@ -92,12 +93,12 @@ fun OrdersScreen(
                     }
                     items(
                         items = uiState.orders,
-                        key = { it.id },
+                        key = { it.orderNumber },
                     ) {
                         order ->
                         OrderItem(
                             order = order,
-                            onClick = { onOrderClick(order.id) },
+                            onClick = { onOrderClick(order.orderNumber) },
                         )
                     }
                 }
@@ -135,23 +136,28 @@ private fun OrderItem(
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = order.productName,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+            Column(
             ) {
-                Text(
-                    text = "Qty: ${order.orderQty}",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Text(
-                    text = "$${order.lineTotal}",
-                    style = MaterialTheme.typography.titleSmall,
-                )
+                order.orderLines.forEach {
+                    Text(
+                        text = it.productName,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            text = "Qty: ${it.orderQty}",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Text(
+                            text = "$${it.lineTotal}",
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                    }
+                }
             }
         }
     }

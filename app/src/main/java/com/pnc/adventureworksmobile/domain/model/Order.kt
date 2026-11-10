@@ -1,6 +1,6 @@
 package com.pnc.adventureworksmobile.domain.model
 
-data class Order(
+data class OrderLine(
     val id: Int,
     val customerId: Int,
     val firstName: String?,
@@ -14,6 +14,18 @@ data class Order(
     val orderQty: Int,
     val unitPrice: Double,
     val lineTotal: Double
+)
+
+data class Order(
+    val orderNumber: Int,
+    val customerId: Int,
+    val firstName: String?,
+    val middleName: String?,
+    val lastName: String?,
+    val suffix: String?,
+    val orderDate: String,
+    val shipDate: String?,
+    var orderLines: List<OrderLine>
 )
 
 data class OrderDetails(
