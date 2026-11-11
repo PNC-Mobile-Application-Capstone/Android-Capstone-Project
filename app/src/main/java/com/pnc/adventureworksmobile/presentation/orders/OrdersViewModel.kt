@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.pnc.adventureworksmobile.core.session.DemoCustomerSession
 import com.pnc.adventureworksmobile.domain.model.Order
 import com.pnc.adventureworksmobile.domain.repository.OrderRepository
+import com.pnc.adventureworksmobile.presentation.shared.ErrorSubject
+import com.pnc.adventureworksmobile.presentation.shared.toFriendlyMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,7 +51,7 @@ class OrdersViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = throwable.message ?: "Failed to load orders",
+                            errorMessage = throwable.toFriendlyMessage(ErrorSubject.Orders),
                         )
                     }
                 }

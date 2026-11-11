@@ -35,7 +35,7 @@ class DefaultProductRepository(
         }
     }
 
-    override suspend fun getProduct(productId: Int): Result<ProductDetails> = runCatching {
+    override suspend fun getProduct(productId: Int): Result<ProductDetails> = safeCall {
         api.getProduct(productId).toDomain()
     }
 

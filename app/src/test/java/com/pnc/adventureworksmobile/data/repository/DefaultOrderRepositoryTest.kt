@@ -9,6 +9,8 @@ import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.io.IOException
+import com.pnc.adventureworksmobile.domain.error.AppError
+import com.pnc.adventureworksmobile.domain.error.asAppError
 
 class DefaultOrderRepositoryTest {
 
@@ -67,7 +69,7 @@ class DefaultOrderRepositoryTest {
         val result = repository.getOrders(customerId = 11711)
 
         assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is IOException)
+        assertEquals(AppError.NoConnection, result.exceptionOrNull()!!.asAppError())
     }
 
     // getOrder

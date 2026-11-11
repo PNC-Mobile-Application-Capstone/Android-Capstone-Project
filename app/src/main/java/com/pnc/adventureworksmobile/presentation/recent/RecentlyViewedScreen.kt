@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.presentation.EmptyDestination
@@ -35,6 +37,7 @@ import com.pnc.adventureworksmobile.presentation.shared.ProductImage
 fun RecentlyViewedScreen(
     uiState: RecentlyViewedUiState,
     onProductSelected: (Int) -> Unit,
+    onRetry: () -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -45,6 +48,11 @@ fun RecentlyViewedScreen(
         ) {
             CircularProgressIndicator()
         }
+
+        uiState.errorMessage != null && uiState.products.isEmpty() -> RecentError(
+            message = uiState.errorMessage,
+            onRetry = onRetry,
+        )
 
         uiState.products.isEmpty() -> EmptyDestination(
             title = "Recently Viewed Products",
@@ -69,6 +77,33 @@ fun RecentlyViewedScreen(
                     onClick = { onProductSelected(product.id) },
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun RecentError(
+    message: String,
+    onRetry: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+        )
+        Button(
+            onClick = onRetry,
+            modifier = Modifier.padding(top = 16.dp),
+        ) {
+            Text("Try again")
         }
     }
 }

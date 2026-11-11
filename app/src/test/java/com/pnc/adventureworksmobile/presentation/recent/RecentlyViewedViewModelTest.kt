@@ -1,7 +1,11 @@
 package com.pnc.adventureworksmobile.presentation.recent
 
 import app.cash.turbine.test
+import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.domain.repository.FakeProductRepository
+import com.pnc.adventureworksmobile.domain.repository.ProductRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import com.pnc.adventureworksmobile.presentation.home.toUiModel
 import com.pnc.adventureworksmobile.testutil.MainDispatcherRule
 import com.pnc.adventureworksmobile.testutil.builders.aProduct
@@ -88,5 +92,43 @@ class RecentlyViewedViewModelTest {
         advanceUntilIdle()
 
         assertFalse(viewModel.uiState.value.products.single().isSaved)
+    }
+
+    @Test
+    fun `a database error shows a message instead of crashing`() = runTest {
+        val failingRepository = object : ProductRepository by repository {
+            override fun observeRecentlyViewedProducts(): Flow<List<Product>> =
+                flow { throw IllegalStateException("db closed") }
+        }
+        val viewModel = RecentlyViewedViewModel(productRepository = failingRepository)
+        advanceUntilIdle()
+
+        assertEquals(
+            RecentlyViewedUiState(
+                isLoading = false,
+                errorMessage = "We couldn't load your recently viewed products. Something went wrong with the data saved on this phone. Please try again.",
+            ),
+            viewModel.uiState.value,
+        )
+    }
+
+    @Test
+    fun `retry clears the error once the history loads`() = runTest {
+        var fail = true
+        val flakyRepository = object : ProductRepository by repository {
+            override fun observeRecentlyViewedProducts(): Flow<List<Product>> =
+                if (fail) flow { throw IllegalStateException("db closed") }
+                else repository.observeRecentlyViewedProducts()
+        }
+        repository.recentlyViewed.value = listOf(aProduct(id = 749))
+        val viewModel = RecentlyViewedViewModel(productRepository = flakyRepository)
+        advanceUntilIdle()
+
+        fail = false
+        viewModel.retry()
+        advanceUntilIdle()
+
+        assertEquals(null, viewModel.uiState.value.errorMessage)
+        assertEquals(listOf(749), viewModel.uiState.value.products.map { it.id })
     }
 }

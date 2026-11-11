@@ -18,9 +18,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
+import com.pnc.adventureworksmobile.domain.error.AppError
+import com.pnc.adventureworksmobile.domain.error.AppException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class OrdersViewModelTest {
+
+    private val ordersError = "We couldn't load your orders. Check your internet connection and try again."
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -59,36 +63,52 @@ class OrdersViewModelTest {
 
     @Test
     fun `shows the error message when loading fails`() = runTest {
-        repository.ordersResult = Result.failure(IOException("network down"))
+        repository.ordersResult = Result.failure(AppException(AppError.NoConnection))
 
         val viewModel = createViewModel()
         advanceUntilIdle()
 
         assertEquals(
-            OrdersUiState(isLoading = false, errorMessage = "network down"),
+            OrdersUiState(isLoading = false, errorMessage = ordersError),
             viewModel.uiState.value
         )
     }
 
     @Test
-    fun `falls back to default message when the error ha snone`() = runTest {
-        repository.ordersResult = Result.failure(IOException())
+    fun `an unwrapped error shows the generic message, not raw text`() = runTest {
+        repository.ordersResult = Result.failure(IOException("java.net.UnknownHostException"))
 
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        assertEquals("Failed to load orders", viewModel.uiState.value.errorMessage)
+        assertEquals(
+            "We couldn't load your orders. Something went wrong. Please try again.",
+            viewModel.uiState.value.errorMessage,
+        )
+    }
+
+    @Test
+    fun `a server error gets its own message`() = runTest {
+        repository.ordersResult = Result.failure(AppException(AppError.Server(500)))
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        assertEquals(
+            "We couldn't load your orders. Our server had a problem. Please try again in a few minutes.",
+            viewModel.uiState.value.errorMessage,
+        )
     }
 
     @Test
     fun `retrying after a failure shows loading again, the nthe orders`() = runTest {
         val orders = listOf(anOrder(id = 1))
-        repository.ordersResult = Result.failure(IOException("network down"))
+        repository.ordersResult = Result.failure(AppException(AppError.NoConnection))
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
             assertEquals(OrdersUiState(isLoading = true), awaitItem())
-            assertEquals(OrdersUiState(isLoading = false, errorMessage = "network down"), awaitItem())
+            assertEquals(OrdersUiState(isLoading = false, errorMessage = ordersError), awaitItem())
 
             repository.ordersResult = Result.success(orders)
             viewModel.loadOrders()
@@ -105,11 +125,11 @@ class OrdersViewModelTest {
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        repository.ordersResult = Result.failure(IOException("network down"))
+        repository.ordersResult = Result.failure(AppException(AppError.NoConnection))
         viewModel.loadOrders()
         advanceUntilIdle()
 
-        assertEquals(OrdersUiState(isLoading = false, orders = orders, errorMessage = "network down"),
+        assertEquals(OrdersUiState(isLoading = false, orders = orders, errorMessage = ordersError),
         viewModel.uiState.value
         )
     }

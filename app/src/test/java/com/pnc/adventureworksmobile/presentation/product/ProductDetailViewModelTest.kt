@@ -14,6 +14,11 @@ import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
+import com.pnc.adventureworksmobile.domain.error.AppError
+import com.pnc.adventureworksmobile.domain.error.AppException
+import com.pnc.adventureworksmobile.domain.model.Product
+import com.pnc.adventureworksmobile.domain.model.ProductDetails
+import com.pnc.adventureworksmobile.domain.repository.ProductRepository
 import com.pnc.adventureworksmobile.domain.model.toProductSummary
 import com.pnc.adventureworksmobile.testutil.builders.aProduct
 
@@ -73,7 +78,7 @@ class ProductDetailViewModelTest {
 
     @Test
     fun `a failed load shows the friendly message`() = runTest {
-        repository.productDetailsResult = Result.failure(IOException("network down"))
+        repository.productDetailsResult = Result.failure(AppException(AppError.NoConnection))
 
         val viewModel = createViewModel()
         advanceUntilIdle()
@@ -81,7 +86,7 @@ class ProductDetailViewModelTest {
         assertEquals(
             ProductDetailUiState(
                 isLoading = false,
-                errorMessage = "We couldn't load this product. Please try again.",
+                errorMessage = "We couldn't load this product. Check your internet connection and try again.",
             ),
             viewModel.uiState.value,
         )
@@ -196,4 +201,58 @@ class ProductDetailViewModelTest {
         }
     }
 
+    @Test
+    fun `a removed product gets the not found message`() = runTest {
+        repository.productDetailsResult = Result.failure(AppException(AppError.NotFound))
+
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        assertEquals(
+            "We couldn't load this product. It may no longer be available.",
+            viewModel.uiState.value.errorMessage,
+        )
+    }
+
+    @Test
+    fun `a failed history write still shows the product`() = runTest {
+        val details = aProductDetails(id = 749)
+        repository.productDetailsResult = Result.success(details)
+        val failingRepository = object : ProductRepository by repository {
+            override suspend fun recordRecentlyViewed(product: ProductDetails) {
+                throw IllegalStateException("disk full")
+            }
+        }
+        val viewModel = ProductDetailViewModel(
+            savedStateHandle = SavedStateHandle(mapOf("productId" to 749)),
+            productRepository = failingRepository,
+        )
+        advanceUntilIdle()
+
+        assertEquals(ProductDetailUiState(isLoading = false, product = details), viewModel.uiState.value)
+    }
+
+    @Test
+    fun `a failed save shows the saved products message instead of crashing`() = runTest {
+        repository.productDetailsResult = Result.success(aProductDetails(id = 749))
+        val failingRepository = object : ProductRepository by repository {
+            override suspend fun saveProduct(product: Product) {
+                throw IllegalStateException("disk full")
+            }
+        }
+        val viewModel = ProductDetailViewModel(
+            savedStateHandle = SavedStateHandle(mapOf("productId" to 749)),
+            productRepository = failingRepository,
+        )
+        advanceUntilIdle()
+
+        viewModel.onSavedToggle()
+        advanceUntilIdle()
+
+        assertEquals(
+            "We couldn't update your saved products. Something went wrong with the data saved on this phone. Please try again.",
+            viewModel.uiState.value.errorMessage,
+        )
+        assertFalse(viewModel.uiState.value.isSaved)
+    }
 }

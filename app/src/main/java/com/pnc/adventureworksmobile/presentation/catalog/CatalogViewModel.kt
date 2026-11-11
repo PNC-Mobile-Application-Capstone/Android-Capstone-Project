@@ -18,6 +18,7 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -143,7 +144,8 @@ class CatalogViewModel @Inject constructor(
 
     private fun observeSavedProducts() {
         viewModelScope.launch {
-            productRepository.observeSavedProducts().collectLatest { savedProducts ->
+            // If Room fails here, hearts just show as unsaved. The catalog itself still works.
+            productRepository.observeSavedProducts().catch { }.collectLatest { savedProducts ->
                 val ids = savedProducts.mapTo(mutableSetOf()) { it.id }
                 savedProductIds = ids
                 _uiState.update { state -> state.copy(products = state.products.map { it.copy(isSaved = it.id in ids) }) }
