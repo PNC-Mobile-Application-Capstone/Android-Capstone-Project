@@ -4,13 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pnc.adventureworksmobile.core.session.DemoCustomer
 import com.pnc.adventureworksmobile.core.session.DemoCustomerSession
+import com.pnc.adventureworksmobile.domain.error.AppError
 import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.domain.repository.ProductRepository
+import com.pnc.adventureworksmobile.presentation.shared.ErrorSubject
 import com.pnc.adventureworksmobile.presentation.shared.productCategory
+import com.pnc.adventureworksmobile.presentation.shared.toFriendlyMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.NumberFormat
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -88,7 +92,6 @@ class CatalogViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(CatalogUiState(demoCustomer = session.activeCustomer))
     private var catalogProductsById = emptyMap<Int, Product>()
     private var savedProductIds = emptySet<Int>()
-
     val uiState: StateFlow<CatalogUiState> = _uiState.asStateFlow()
 
     init {
@@ -96,32 +99,26 @@ class CatalogViewModel @Inject constructor(
         refresh()
     }
 
-    fun onSearchQueryChange(query: String) {
-        _uiState.update { it.copy(searchQuery = query) }
-    }
-
-    fun onCategorySelected(category: String) {
-        _uiState.update { it.copy(selectedCategory = category) }
-    }
-
-    fun onSortSelected(sort: ProductSort) {
-        _uiState.update { it.copy(selectedSort = sort) }
-    }
-
+    fun onSearchQueryChange(query: String) { _uiState.update { it.copy(searchQuery = query) } }
+    fun onCategorySelected(category: String) { _uiState.update { it.copy(selectedCategory = category) } }
+    fun onSortSelected(sort: ProductSort) { _uiState.update { it.copy(selectedSort = sort) } }
     fun onSavedToggle(productId: Int) {
         val product = _uiState.value.products.firstOrNull { it.id == productId } ?: return
         viewModelScope.launch {
-            if (product.isSaved) {
-                productRepository.removeSavedProduct(productId)
-            } else {
-                catalogProductsById[productId]?.let { productRepository.saveProduct(it) }
+            try {
+                if (product.isSaved) productRepository.removeSavedProduct(productId)
+                else catalogProductsById[productId]?.let { productRepository.saveProduct(it) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = AppError.LocalStorage.toFriendlyMessage(ErrorSubject.UpdateSaved)) }
             }
         }
     }
 
     fun refresh() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = it.products.isEmpty(), errorMessage = null) }
+            _uiState.update { state -> state.copy(isLoading = state.products.isEmpty(), errorMessage = null) }
             productRepository.getProducts()
                 .onSuccess { products ->
                     catalogProductsById = products.associateBy { it.id }
@@ -133,11 +130,11 @@ class CatalogViewModel @Inject constructor(
                         )
                     }
                 }
-                .onFailure {
+                .onFailure { throwable ->
                     _uiState.update { state ->
                         state.copy(
                             isLoading = false,
-                            errorMessage = "We couldn't load the catalog. Check your connection and try again.",
+                            errorMessage = throwable.toFriendlyMessage(ErrorSubject.Catalog),
                         )
                     }
                 }
@@ -149,9 +146,7 @@ class CatalogViewModel @Inject constructor(
             productRepository.observeSavedProducts().collectLatest { savedProducts ->
                 val ids = savedProducts.mapTo(mutableSetOf()) { it.id }
                 savedProductIds = ids
-                _uiState.update { state ->
-                    state.copy(products = state.products.map { it.copy(isSaved = it.id in ids) })
-                }
+                _uiState.update { state -> state.copy(products = state.products.map { it.copy(isSaved = it.id in ids) }) }
             }
         }
     }

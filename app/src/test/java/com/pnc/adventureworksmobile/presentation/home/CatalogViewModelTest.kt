@@ -16,7 +16,8 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import java.io.IOException
+import com.pnc.adventureworksmobile.domain.error.AppError
+import com.pnc.adventureworksmobile.domain.error.AppException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CatalogViewModelTest {
@@ -27,7 +28,7 @@ class CatalogViewModelTest {
     private val repository = FakeProductRepository()
     private val session = FakeDemoCustomerSession()
 
-    private val catalogError = "We couldn't load the catalog. Check your connection and try again."
+    private val catalogError = "We couldn't load the catalog. Check your internet connection and try again."
 
     private fun createViewModel(productRepository: ProductRepository = repository) =
         CatalogViewModel(session = session, productRepository = productRepository)
@@ -53,7 +54,7 @@ class CatalogViewModelTest {
 
     @Test
     fun `a failed load shows the friendly catalog message`() = runTest {
-        repository.productsResult = Result.failure(IOException("network down"))
+        repository.productsResult = Result.failure(AppException(AppError.NoConnection))
 
         val viewModel = createViewModel()
         advanceUntilIdle()
@@ -71,7 +72,7 @@ class CatalogViewModelTest {
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        repository.productsResult = Result.failure(IOException("network down"))
+        repository.productsResult = Result.failure(AppException(AppError.NoConnection))
         viewModel.refresh()
         advanceUntilIdle()
 
@@ -193,5 +194,26 @@ class CatalogViewModelTest {
 
         assertTrue(repository.savedCalls.isEmpty())
         assertTrue(repository.removedIds.isEmpty())
+    }
+
+    @Test
+    fun `a failed save shows the saved products message instead of crashing`() = runTest {
+        repository.productsResult = Result.success(listOf(aProduct(id = 749)))
+        val failingRepository = object : ProductRepository by repository {
+            override suspend fun saveProduct(product: Product) {
+                throw IllegalStateException("disk full")
+            }
+        }
+        val viewModel = createViewModel(productRepository = failingRepository)
+        advanceUntilIdle()
+
+        viewModel.onSavedToggle(749)
+        advanceUntilIdle()
+
+        assertEquals(
+            "We couldn't update your saved products. Something went wrong with the data saved on this phone. Please try again.",
+            viewModel.uiState.value.errorMessage,
+        )
+        assertFalse(viewModel.uiState.value.products.single().isSaved)
     }
 }

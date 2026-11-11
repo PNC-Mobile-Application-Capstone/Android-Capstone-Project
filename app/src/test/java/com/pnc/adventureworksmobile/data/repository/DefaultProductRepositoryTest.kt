@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.io.IOException
+import com.pnc.adventureworksmobile.domain.error.AppError
+import com.pnc.adventureworksmobile.domain.error.asAppError
 
 class DefaultProductRepositoryTest {
 
@@ -79,7 +81,7 @@ class DefaultProductRepositoryTest {
         val result = repository.getProducts()
 
         assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is IOException)
+        assertEquals(AppError.NoConnection, result.exceptionOrNull()!!.asAppError())
     }
 
     @Test
