@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.domain.model.Order
+import com.pnc.adventureworksmobile.presentation.shared.ErrorView
 
 @Composable
 fun OrdersScreen(
@@ -43,21 +44,11 @@ fun OrdersScreen(
             }
 
             uiState.errorMessage != null -> {
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        text = uiState.errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = onRetry) {
-                        Text("Retry")
-                    }
-                }
+                ErrorView(
+                    message = uiState.errorMessage,
+                    onRetry = onRetry,
+                    modifier = Modifier.align(Alignment.Center),
+                )
             }
 
             uiState.orders.isEmpty() -> {

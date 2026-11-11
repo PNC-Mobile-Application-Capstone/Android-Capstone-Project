@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.core.session.DemoCustomer
 import com.pnc.adventureworksmobile.presentation.shared.ProductImage
 import com.pnc.adventureworksmobile.ui.theme.AdventureWorksMobileTheme
+import com.pnc.adventureworksmobile.presentation.shared.ErrorView
 
 @Composable
 fun CatalogScreen(
@@ -130,7 +131,7 @@ fun CatalogScreen(
 
         when {
             uiState.isLoading -> LoadingCatalog(modifier = Modifier.fillMaxSize())
-            uiState.errorMessage != null && uiState.products.isEmpty() -> ErrorCatalog(
+            uiState.errorMessage != null && uiState.products.isEmpty() -> ErrorView(
                 message = uiState.errorMessage,
                 onRetry = onRetry,
                 modifier = Modifier.fillMaxSize(),
@@ -342,28 +343,6 @@ private fun ProductCard(
 private fun LoadingCatalog(modifier: Modifier = Modifier) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         CircularProgressIndicator()
-    }
-}
-
-@Composable
-private fun ErrorCatalog(
-    message: String,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-        )
-        Button(onClick = onRetry, modifier = Modifier.padding(top = 16.dp)) {
-            Text("Try again")
-        }
     }
 }
 

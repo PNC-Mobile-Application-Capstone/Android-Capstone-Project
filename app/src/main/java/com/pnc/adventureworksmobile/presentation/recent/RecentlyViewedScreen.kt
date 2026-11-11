@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.presentation.EmptyDestination
 import com.pnc.adventureworksmobile.presentation.home.ProductUiModel
 import com.pnc.adventureworksmobile.presentation.shared.ProductImage
+import com.pnc.adventureworksmobile.presentation.shared.ErrorView
 
 @Composable
 fun RecentlyViewedScreen(
@@ -49,9 +50,12 @@ fun RecentlyViewedScreen(
             CircularProgressIndicator()
         }
 
-        uiState.errorMessage != null && uiState.products.isEmpty() -> RecentError(
+        uiState.errorMessage != null && uiState.products.isEmpty() -> ErrorView(
             message = uiState.errorMessage,
             onRetry = onRetry,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
         )
 
         uiState.products.isEmpty() -> EmptyDestination(
@@ -77,33 +81,6 @@ fun RecentlyViewedScreen(
                     onClick = { onProductSelected(product.id) },
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun RecentError(
-    message: String,
-    onRetry: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-        )
-        Button(
-            onClick = onRetry,
-            modifier = Modifier.padding(top = 16.dp),
-        ) {
-            Text("Try again")
         }
     }
 }

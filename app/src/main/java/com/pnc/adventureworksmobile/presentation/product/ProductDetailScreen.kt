@@ -36,6 +36,7 @@ import com.pnc.adventureworksmobile.presentation.shared.ProductImage
 import com.pnc.adventureworksmobile.presentation.shared.productCategory
 import java.text.NumberFormat
 import java.util.Locale
+import com.pnc.adventureworksmobile.presentation.shared.ErrorView
 
 @Composable
 fun ProductDetailScreen(
@@ -59,10 +60,15 @@ fun ProductDetailScreen(
             onBack = onBack,
             onSavedToggle = onSavedToggle,
         )
-        else -> ProductDetailError(
+        else -> ErrorView(
             message = uiState.errorMessage.orEmpty(),
-            onBack = onBack,
             onRetry = onRetry,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            title = "Product unavailable",
+            secondaryActionLabel = "Back to catalog",
+            onSecondaryAction = onBack,
         )
     }
 }
@@ -199,28 +205,3 @@ private fun DetailSection(title: String, body: String) {
     )
 }
 
-@Composable
-private fun ProductDetailError(
-    message: String,
-    onBack: () -> Unit,
-    onRetry: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(text = "Product unavailable", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-        Text(
-            text = message,
-            modifier = Modifier.padding(top = 8.dp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        Button(onClick = onRetry, modifier = Modifier.padding(top = 18.dp)) { Text("Try again") }
-        TextButton(onClick = onBack) { Text("Back to catalog") }
-    }
-}
