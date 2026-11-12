@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pnc.adventureworksmobile.domain.model.OrderDetails
 import com.pnc.adventureworksmobile.domain.repository.OrderRepository
+import com.pnc.adventureworksmobile.presentation.shared.ErrorSubject
+import com.pnc.adventureworksmobile.presentation.shared.toFriendlyMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +48,7 @@ class OrderDetailsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = throwable.message ?: "Failed to load order details",
+                            errorMessage = throwable.toFriendlyMessage(ErrorSubject.OrderDetails),
                         )
                     }
                 }

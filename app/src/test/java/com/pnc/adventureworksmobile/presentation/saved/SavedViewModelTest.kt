@@ -68,7 +68,7 @@ class SavedViewModelTest {
 
         assertEquals(false, viewModel.uiState.value.isLoading)
         assertEquals(
-            "We couldn't load your saved products. Please try again.",
+            "We couldn't load your saved products. Something went wrong with the data saved on this phone. Please try again.",
             viewModel.uiState.value.errorMessage,
         )
     }

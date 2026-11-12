@@ -1,5 +1,6 @@
 package com.pnc.adventureworksmobile.data.repository
 
+import com.pnc.adventureworksmobile.data.error.safeCall
 import com.pnc.adventureworksmobile.data.local.RecentlyViewedProductDao
 import com.pnc.adventureworksmobile.data.local.toProduct
 import com.pnc.adventureworksmobile.data.local.toRecentlyViewedEntity
@@ -18,7 +19,7 @@ class DefaultProductRepository(
     private val savedProductDao: SavedProductDao,
     private val recentlyViewedProductDao: RecentlyViewedProductDao,
 ) : ProductRepository {
-    override suspend fun getProducts(): Result<List<Product>> = runCatching {
+    override suspend fun getProducts(): Result<List<Product>> = safeCall {
         api.getProducts().map { it.toDomain() }.also { products ->
             val savedProductIds = savedProductDao.getSavedProductIds().toSet()
             products.filter { it.id in savedProductIds }.forEach { product ->
@@ -34,7 +35,7 @@ class DefaultProductRepository(
         }
     }
 
-    override suspend fun getProduct(productId: Int): Result<ProductDetails> = runCatching {
+    override suspend fun getProduct(productId: Int): Result<ProductDetails> = safeCall {
         api.getProduct(productId).toDomain()
     }
 

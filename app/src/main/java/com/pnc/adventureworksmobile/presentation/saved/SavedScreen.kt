@@ -36,6 +36,7 @@ import com.pnc.adventureworksmobile.presentation.shared.ProductImage
 import com.pnc.adventureworksmobile.presentation.shared.productCategory
 import java.text.NumberFormat
 import java.util.Locale
+import com.pnc.adventureworksmobile.presentation.shared.ErrorView
 
 @Composable
 fun SavedScreen(
@@ -54,9 +55,12 @@ fun SavedScreen(
             CircularProgressIndicator()
         }
 
-        uiState.errorMessage != null && uiState.products.isEmpty() -> SavedError(
+        uiState.errorMessage != null && uiState.products.isEmpty() -> ErrorView(
             message = uiState.errorMessage,
             onRetry = onRetry,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
         )
 
         uiState.products.isEmpty() -> EmptyDestination(
@@ -166,29 +170,3 @@ private fun SavedProductRow(
     }
 }
 
-@Composable
-private fun SavedError(
-    message: String,
-    onRetry: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-        )
-        Button(
-            onClick = onRetry,
-            modifier = Modifier.padding(top = 16.dp),
-        ) {
-            Text("Try again")
-        }
-    }
-}

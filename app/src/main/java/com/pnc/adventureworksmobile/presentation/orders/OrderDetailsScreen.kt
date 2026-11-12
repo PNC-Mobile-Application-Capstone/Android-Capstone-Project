@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.domain.model.OrderDetails
 import java.text.NumberFormat
 import java.util.Locale
+import com.pnc.adventureworksmobile.presentation.shared.ErrorView
 
 @Composable
 fun OrderDetailsScreen(
@@ -53,32 +54,14 @@ fun OrderDetailsScreen(
             }
 
             uiState.errorMessage != null -> {
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Text(
-                        text = "Order unavailable",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = uiState.errorMessage,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = onRetry) {
-                        Text("Try again")
-                    }
-                    TextButton(onClick = onBack) {
-                        Text("Back to orders")
-                    }
-                }
+                ErrorView(
+                    message = uiState.errorMessage,
+                    onRetry = onRetry,
+                    modifier = Modifier.align(Alignment.Center),
+                    title = "Order unavailable",
+                    secondaryActionLabel = "Back to orders",
+                    onSecondaryAction = onBack,
+                )
             }
 
             uiState.orderDetails != null -> {

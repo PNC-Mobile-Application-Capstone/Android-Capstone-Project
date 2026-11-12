@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,16 +26,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.presentation.EmptyDestination
 import com.pnc.adventureworksmobile.presentation.home.ProductUiModel
 import com.pnc.adventureworksmobile.presentation.shared.ProductImage
+import com.pnc.adventureworksmobile.presentation.shared.ErrorView
 
 @Composable
 fun RecentlyViewedScreen(
     uiState: RecentlyViewedUiState,
     onProductSelected: (Int) -> Unit,
+    onRetry: () -> Unit = {},
 ) {
     when {
         uiState.isLoading -> Box(
@@ -45,6 +49,14 @@ fun RecentlyViewedScreen(
         ) {
             CircularProgressIndicator()
         }
+
+        uiState.errorMessage != null && uiState.products.isEmpty() -> ErrorView(
+            message = uiState.errorMessage,
+            onRetry = onRetry,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+        )
 
         uiState.products.isEmpty() -> EmptyDestination(
             title = "Recently Viewed Products",

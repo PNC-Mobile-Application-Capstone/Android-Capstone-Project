@@ -189,6 +189,7 @@ fun AdventureWorksApp() {
                     onProductSelected = { productId ->
                         navController.navigate("product/$productId")
                     },
+                    onRetry = viewModel::retry,
                 )
             }
         }

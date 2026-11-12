@@ -2,10 +2,14 @@ package com.pnc.adventureworksmobile.presentation.saved
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pnc.adventureworksmobile.domain.error.AppError
 import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.domain.repository.ProductRepository
+import com.pnc.adventureworksmobile.presentation.shared.ErrorSubject
+import com.pnc.adventureworksmobile.presentation.shared.toFriendlyMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +43,15 @@ class SavedViewModel @Inject constructor(
 
     fun removeSavedProduct(productId: Int) {
         viewModelScope.launch {
-            productRepository.removeSavedProduct(productId)
+            try {
+                productRepository.removeSavedProduct(productId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = AppError.LocalStorage.toFriendlyMessage(ErrorSubject.UpdateSaved))
+                }
+            }
         }
     }
 
@@ -57,7 +69,8 @@ class SavedViewModel @Inject constructor(
                     _uiState.update { currentState ->
                         currentState.copy(
                             isLoading = false,
-                            errorMessage = "We couldn't load your saved products. Please try again.",
+                            // This Flow only reads Room, so any error here is a local storage error.
+                            errorMessage = AppError.LocalStorage.toFriendlyMessage(ErrorSubject.SavedProducts),
                         )
                     }
                 }
