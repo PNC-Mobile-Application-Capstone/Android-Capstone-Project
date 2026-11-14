@@ -3,7 +3,7 @@ package com.pnc.adventureworksmobile.data.repository
 import com.pnc.adventureworksmobile.data.error.safeCall
 import com.pnc.adventureworksmobile.data.remote.OrderApi
 import com.pnc.adventureworksmobile.data.remote.toDomain
-import com.pnc.adventureworksmobile.domain.model.Order
+import com.pnc.adventureworksmobile.domain.model.OrderLine
 import com.pnc.adventureworksmobile.domain.model.OrderDetails
 import com.pnc.adventureworksmobile.domain.repository.OrderRepository
 
