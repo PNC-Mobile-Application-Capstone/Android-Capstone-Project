@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pnc.adventureworksmobile.core.session.DemoCustomerSession
 import com.pnc.adventureworksmobile.domain.model.Order
+import com.pnc.adventureworksmobile.domain.model.OrderLine
 import com.pnc.adventureworksmobile.domain.repository.OrderRepository
 import com.pnc.adventureworksmobile.presentation.shared.ErrorSubject
 import com.pnc.adventureworksmobile.presentation.shared.toFriendlyMessage
@@ -37,12 +38,12 @@ class OrdersViewModel @Inject constructor(
     fun loadOrders() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            orderRepository.getOrders(session.activeCustomer.id)
-                .onSuccess { orders ->
+            orderRepository.getOrderLines(session.activeCustomer.id)
+                .onSuccess { orderLines ->
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            orders = orders,
+                            orders = getOrdersFromOrderLines(orderLines),
                             errorMessage = null,
                         )
                     }
@@ -56,5 +57,35 @@ class OrdersViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    fun getOrdersFromOrderLines(orderLines: List<OrderLine>): List<Order> {
+        val orders: MutableList<Order> = mutableListOf()
+        orderLines.forEach { thisOrderLine ->
+            // if we can find an Order in the new list, add to it; otherwise, create a new Order
+            val currentOrder: Order? = orders.find {it.orderNumber == thisOrderLine.orderNumber}
+            if (currentOrder != null) {
+                currentOrder.orderLines += thisOrderLine
+            }
+            else {
+                // create a list, then add this OrderLine as its first object
+                val newOrderLineList = mutableListOf<OrderLine>()
+                newOrderLineList.add(thisOrderLine)
+                // construct a new Order based on this OrderLine
+                val newOrder = Order(
+                    orderNumber = thisOrderLine.orderNumber,
+                    customerId = thisOrderLine.customerId,
+                    firstName = thisOrderLine.firstName,
+                    middleName = thisOrderLine.middleName,
+                    lastName = thisOrderLine.lastName,
+                    suffix = thisOrderLine.suffix,
+                    orderDate = thisOrderLine.orderDate,
+                    shipDate = thisOrderLine.shipDate,
+                    orderLines = newOrderLineList
+                )
+                orders.add(newOrder)
+            }
+        }
+        return orders
     }
 }

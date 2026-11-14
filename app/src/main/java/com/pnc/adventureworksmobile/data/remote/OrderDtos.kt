@@ -1,7 +1,7 @@
 package com.pnc.adventureworksmobile.data.remote
 
-import com.pnc.adventureworksmobile.domain.model.Order
 import com.pnc.adventureworksmobile.domain.model.OrderDetails
+import com.pnc.adventureworksmobile.domain.model.OrderLine
 import kotlinx.serialization.Serializable
 
 
@@ -49,7 +49,7 @@ data class OrderDetailsDto(
     val lineTotal: Double = 0.0
 )
 
-fun OrderListDto.toDomain(): Order = Order(
+fun OrderListDto.toDomain(): OrderLine = OrderLine(
         id = id,
         customerId = customerId,
         firstName = firstName,

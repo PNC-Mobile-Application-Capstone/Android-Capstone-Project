@@ -10,7 +10,7 @@ import com.pnc.adventureworksmobile.domain.repository.OrderRepository
 class DefaultOrderRepository(
     private val api: OrderApi,
 ) : OrderRepository {
-    override suspend fun getOrders(customerId: Int): Result<List<Order>> = safeCall {
+    override suspend fun getOrderLines(customerId: Int): Result<List<OrderLine>> = safeCall {
         api.getOrders()
             .filter { it.customerId == customerId }
             .map { it.toDomain() }
