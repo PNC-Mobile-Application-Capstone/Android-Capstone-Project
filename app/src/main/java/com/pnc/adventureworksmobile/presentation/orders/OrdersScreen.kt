@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.domain.model.Order
 import com.pnc.adventureworksmobile.domain.model.OrderLine
+import com.pnc.adventureworksmobile.presentation.shared.ErrorView
 
 @Composable
 fun OrdersScreen(
