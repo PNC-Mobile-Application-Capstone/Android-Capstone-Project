@@ -102,6 +102,8 @@ private class FakeProductRepository(
     override suspend fun recordRecentlyViewed(product: ProductDetails) = Unit
 
     override fun observeRecentlyViewedProducts(): Flow<List<Product>> = flowOf(emptyList())
+
+    override suspend fun clearRecentlyViewed() = Unit
 }
 
 private fun product(id: Int) = Product(

@@ -190,6 +190,7 @@ fun AdventureWorksApp() {
                         navController.navigate("product/$productId")
                     },
                     onRetry = viewModel::retry,
+                    onClearHistory = viewModel::clearHistory,
                 )
             }
         }

@@ -226,6 +226,18 @@ class DefaultProductRepositoryTest {
         assertEquals(listOf("record 749", "trim"), recentDao.calls)
     }
 
+    @Test
+    fun `clearing recently viewed only clears the recent table`() = runTest {
+        recentDao.recent.value = listOf(recentRow(749), recentRow(750))
+        savedDao.saved.value = listOf(savedRow(680))
+
+        repository.clearRecentlyViewed()
+
+        assertEquals(listOf("clear"), recentDao.calls)
+        assertTrue(recentDao.recent.value.isEmpty())
+        assertEquals(listOf(680), savedDao.saved.value.map { it.productId })
+    }
+
 
     // observeSavedProductIds
     @Test

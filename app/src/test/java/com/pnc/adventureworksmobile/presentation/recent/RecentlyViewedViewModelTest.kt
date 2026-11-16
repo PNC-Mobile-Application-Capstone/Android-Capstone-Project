@@ -131,4 +131,41 @@ class RecentlyViewedViewModelTest {
         assertEquals(null, viewModel.uiState.value.errorMessage)
         assertEquals(listOf(749), viewModel.uiState.value.products.map { it.id })
     }
+
+    @Test
+    fun `clear history empties the list and keeps saved products`() = runTest {
+        val saved = aProduct(id = 680)
+        repository.savedProducts.value = listOf(saved)
+        repository.recentlyViewed.value = listOf(aProduct(id = 749), aProduct(id = 750))
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        viewModel.clearHistory()
+        advanceUntilIdle()
+
+        assertEquals(1, repository.clearRecentlyViewedCalls)
+        assertEquals(RecentlyViewedUiState(isLoading = false), viewModel.uiState.value)
+        assertEquals(listOf(saved), repository.savedProducts.value)
+    }
+
+    @Test
+    fun `a failed clear keeps the list and shows a message`() = runTest {
+        val failingRepository = object : ProductRepository by repository {
+            override suspend fun clearRecentlyViewed() {
+                throw IllegalStateException("db closed")
+            }
+        }
+        repository.recentlyViewed.value = listOf(aProduct(id = 749))
+        val viewModel = RecentlyViewedViewModel(productRepository = failingRepository)
+        advanceUntilIdle()
+
+        viewModel.clearHistory()
+        advanceUntilIdle()
+
+        assertEquals(listOf(749), viewModel.uiState.value.products.map { it.id })
+        assertEquals(
+            "We couldn't clear your recently viewed products. Something went wrong with the data saved on this phone. Please try again.",
+            viewModel.uiState.value.errorMessage,
+        )
+    }
 }

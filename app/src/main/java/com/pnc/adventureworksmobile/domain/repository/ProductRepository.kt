@@ -18,4 +18,6 @@ interface ProductRepository {
     suspend fun recordRecentlyViewed(product: ProductDetails)
 
     fun observeRecentlyViewedProducts(): Flow<List<Product>>
+
+    suspend fun clearRecentlyViewed()
 }

@@ -10,6 +10,7 @@ import com.pnc.adventureworksmobile.presentation.shared.ErrorSubject
 import com.pnc.adventureworksmobile.presentation.shared.toFriendlyMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +40,21 @@ class RecentlyViewedViewModel @Inject constructor(
     }
 
     fun retry() = observeRecentlyViewed()
+
+    // Empties the history. The Room Flow sends the empty list, so the screen updates on its own.
+    fun clearHistory() {
+        viewModelScope.launch {
+            try {
+                productRepository.clearRecentlyViewed()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = AppError.LocalStorage.toFriendlyMessage(ErrorSubject.ClearRecentlyViewed))
+                }
+            }
+        }
+    }
 
     private fun observeRecentlyViewed() {
         recentProductsJob?.cancel()

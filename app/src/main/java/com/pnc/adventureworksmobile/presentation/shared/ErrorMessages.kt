@@ -15,6 +15,7 @@ enum class ErrorSubject(val action: String) {
     SavedProducts("load your saved products"),
     RecentlyViewed("load your recently viewed products"),
     UpdateSaved("update your saved products"),
+    ClearRecentlyViewed("clear your recently viewed products"),
 }
 
 
