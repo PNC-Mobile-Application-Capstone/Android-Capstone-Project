@@ -1,6 +1,8 @@
 package com.pnc.adventureworksmobile.presentation.home
 
+import com.pnc.adventureworksmobile.domain.model.ProductAvailability
 import com.pnc.adventureworksmobile.testutil.builders.aProduct
+import java.math.BigDecimal
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
@@ -16,7 +18,8 @@ class ProductUiModelTest {
             productNumber = "BK-R93R-62",
             thumbnailBase64 = "thumbnail-base64",
             thumbnailPhotoFileName = "road150_small.gif",
-            listPrice = 3578.27,
+            listPrice = BigDecimal("3578.27"),
+            stockLevel = 133,
         )
 
         val uiModel = product.toUiModel()
@@ -28,9 +31,9 @@ class ProductUiModelTest {
                 productNumber = "BK-R93R-62",
                 category = "Bikes",
                 price = "$3,578.27",
-                listPrice = 3578.27,
                 thumbnailBase64 = "thumbnail-base64",
                 thumbnailPhotoFileName = "road150_small.gif",
+                availability = ProductAvailability.InStock,
                 isSaved = false,
             ),
             uiModel,
@@ -39,30 +42,30 @@ class ProductUiModelTest {
 
     @Test
     fun `formats the price as US dollars`() {
-        val uiModel = aProduct(listPrice = 48151623.42).toUiModel()
+        val uiModel = aProduct(listPrice = BigDecimal("48151623.42")).toUiModel()
 
         assertEquals("$48,151,623.42", uiModel.price)
     }
 
     @Test
     fun `a zero price is formatted with two decimals`() {
-        val uiModel = aProduct(listPrice = 0.0).toUiModel()
+        val uiModel = aProduct(listPrice = BigDecimal.ZERO).toUiModel()
 
         assertEquals("$0.00", uiModel.price)
     }
 
     @Test
     fun `prices are rounded to the nearest cent`() {
-        val uiModel = aProduct(listPrice = 66.999).toUiModel()
+        val uiModel = aProduct(listPrice = BigDecimal("66.999")).toUiModel()
 
         assertEquals("$67.00", uiModel.price)
     }
 
     @Test
-    fun `keeps the raw list price for sorting`() {
-        val uiModel = aProduct(listPrice = 12.34).toUiModel()
+    fun `a missing stock level shows availability unknown`() {
+        val uiModel = aProduct(stockLevel = null).toUiModel()
 
-        assertEquals(12.34, uiModel.listPrice)
+        assertEquals(ProductAvailability.Unknown, uiModel.availability)
     }
 
     @Test
@@ -85,5 +88,4 @@ class ProductUiModelTest {
 
         assertTrue(uiModel.isSaved)
     }
-
 }

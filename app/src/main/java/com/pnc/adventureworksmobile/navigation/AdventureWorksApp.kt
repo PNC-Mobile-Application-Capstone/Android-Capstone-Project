@@ -31,6 +31,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.pnc.adventureworksmobile.presentation.home.CatalogViewModel
@@ -46,7 +47,6 @@ import com.pnc.adventureworksmobile.presentation.recent.RecentlyViewedViewModel
 import com.pnc.adventureworksmobile.presentation.saved.SavedScreen
 import com.pnc.adventureworksmobile.presentation.saved.SavedViewModel
 
-
 enum class TopLevelDestination(
     val route: String,
     val title: String,
@@ -56,6 +56,16 @@ enum class TopLevelDestination(
     Orders(route = "orders", title = "Orders", icon = Icons.AutoMirrored.Outlined.ReceiptLong),
     Saved(route = "saved", title = "Saved", icon = Icons.Outlined.FavoriteBorder),
     Recent(route = "recent", title = "Recents", icon = Icons.Outlined.WatchLater),
+}
+
+private fun NavHostController.navigateToTopLevel(destination: TopLevelDestination) {
+    navigate(destination.route) {
+        launchSingleTop = true
+        restoreState = true
+        popUpTo(TopLevelDestination.Catalog.route) {
+            saveState = true
+        }
+    }
 }
 
 @Composable
@@ -77,15 +87,7 @@ fun AdventureWorksApp() {
                     TopLevelDestination.entries.forEach { destination ->
                         NavigationBarItem(
                             selected = currentRoute == destination.route,
-                            onClick = {
-                                navController.navigate(destination.route) {
-                                    launchSingleTop = true
-                                    restoreState = true
-                                    popUpTo(TopLevelDestination.Catalog.route) {
-                                        saveState = true
-                                    }
-                                }
-                            },
+                            onClick = { navController.navigateToTopLevel(destination) },
                             icon = {
                                 Icon(
                                     imageVector = destination.icon,
@@ -131,6 +133,9 @@ fun AdventureWorksApp() {
                     onProductSelected = { productId ->
                         navController.navigate("product/$productId")
                     },
+                    onRetryRecentOrders = viewModel::retryRecentOrders,
+                    onSeeAllOrders = { navController.navigateToTopLevel(TopLevelDestination.Orders) },
+                    onSeeAllRecentlyViewed = { navController.navigateToTopLevel(TopLevelDestination.Recent) },
                 )
             }
             composable(
@@ -190,6 +195,7 @@ fun AdventureWorksApp() {
                         navController.navigate("product/$productId")
                     },
                     onRetry = viewModel::retry,
+                    onClearHistory = viewModel::clearHistory,
                 )
             }
         }

@@ -1,10 +1,10 @@
 package com.pnc.adventureworksmobile.testutil.builders
 
+import java.math.BigDecimal
 import com.pnc.adventureworksmobile.data.remote.OrderDetailsDto
 import com.pnc.adventureworksmobile.data.remote.OrderListDto
 import com.pnc.adventureworksmobile.data.remote.ProductDetailsDto
 import com.pnc.adventureworksmobile.data.remote.ProductListDto
-
 
 fun aProductListDto(
     productId: Int = 1,
@@ -12,7 +12,7 @@ fun aProductListDto(
     productNumber: String? = "001",
     thumbnailPhoto: String? = "thumbnail-base64",
     thumbnailPhotoFileName: String? = "thumbnail.gif",
-    listPrice: Double = 10.0,
+    listPrice: BigDecimal = BigDecimal("10.00"),
 ) = ProductListDto(
     productId = productId,
     name = name,
@@ -30,7 +30,7 @@ fun aProductDetailsDto(
     photo: String? = "photo-base64",
     photoFileName: String? = "photo.gif",
     color: String? = "Red",
-    listPrice: Double = 10.0,
+    listPrice: BigDecimal = BigDecimal("10.00"),
     productLine: String? = null,
     productModelName: String? = null,
     riderExperience: String? = null,
@@ -73,7 +73,7 @@ fun anOrderListDto(
     orderNumber: Int = 43_659,
     orderQty: Int = 2,
     unitPrice: Double = 10.0,
-    lineTotal: Double = orderQty * unitPrice,   // derived from earlier parameters
+    lineTotal: Double = orderQty * unitPrice,
 ) = OrderListDto(
     id = id,
     customerId = customerId,

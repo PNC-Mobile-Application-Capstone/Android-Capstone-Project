@@ -2,6 +2,7 @@ package com.pnc.adventureworksmobile.data.remote
 
 import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.domain.model.ProductDetails
+import java.math.BigDecimal
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,7 +12,10 @@ data class ProductListDto(
     val productNumber: String? = null,
     val thumbnailPhoto: String? = null,
     val thumbnailPhotoFileName: String? = null,
-    val listPrice: Double = 0.0,
+    @Serializable(with = BigDecimalSerializer::class)
+    val listPrice: BigDecimal = BigDecimal.ZERO,
+
+    val stockLevel: Int? = null,
 )
 
 @Serializable
@@ -23,7 +27,8 @@ data class ProductDetailsDto(
     val photo: String? = null,
     val photoFileName: String? = null,
     val color: String? = null,
-    val listPrice: Double = 0.0,
+    @Serializable(with = BigDecimalSerializer::class)
+    val listPrice: BigDecimal = BigDecimal.ZERO,
     val productLine: String? = null,
     val productModelName: String? = null,
     val riderExperience: String? = null,
@@ -33,6 +38,7 @@ data class ProductDetailsDto(
     val warrantyPeriod: String? = null,
     val warrantyDescription: String? = null,
     val maintenanceDescription: String? = null,
+    val stockLevel: Int? = null,
 )
 
 fun ProductListDto.toDomain(): Product = Product(
@@ -42,6 +48,7 @@ fun ProductListDto.toDomain(): Product = Product(
     thumbnailBase64 = thumbnailPhoto,
     thumbnailPhotoFileName = thumbnailPhotoFileName,
     listPrice = listPrice,
+    stockLevel = stockLevel,
 )
 
 fun ProductDetailsDto.toDomain(): ProductDetails = ProductDetails(
@@ -62,4 +69,5 @@ fun ProductDetailsDto.toDomain(): ProductDetails = ProductDetails(
     warrantyPeriod = warrantyPeriod,
     warrantyDescription = warrantyDescription,
     maintenanceDescription = maintenanceDescription,
+    stockLevel = stockLevel,
 )

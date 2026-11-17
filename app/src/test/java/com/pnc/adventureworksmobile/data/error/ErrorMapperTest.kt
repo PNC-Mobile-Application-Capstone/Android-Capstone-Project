@@ -22,8 +22,6 @@ class ErrorMapperTest {
 
     private fun httpError(code: Int) = HttpException(Response.error<Any>(code, "".toResponseBody()))
 
-    // toAppError
-
     @Test
     fun `no host and dropped connection map to NoConnection`() {
         assertEquals(AppError.NoConnection, UnknownHostException("api").toAppError())
@@ -53,8 +51,6 @@ class ErrorMapperTest {
     fun `an unplanned exception maps to Unknown`() {
         assertEquals(AppError.Unknown, IllegalStateException().toAppError())
     }
-
-    // safeCall
 
     @Test
     fun `safeCall returns the value on success`() = runTest {
@@ -88,8 +84,6 @@ class ErrorMapperTest {
         }
         assertTrue(rethrown)
     }
-
-    // asAppError
 
     @Test
     fun `an unwrapped exception reads as Unknown`() {

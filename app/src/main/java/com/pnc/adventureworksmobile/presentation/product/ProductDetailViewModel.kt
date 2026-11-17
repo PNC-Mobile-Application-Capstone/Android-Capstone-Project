@@ -82,20 +82,19 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
-    // History is a nice extra. If Room fails, still show the product.
     private suspend fun recordRecentlyViewed(product: ProductDetails) {
         try {
             productRepository.recordRecentlyViewed(product)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            // Ignored on purpose. The product loaded fine.
+
         }
     }
 
     private fun observeSavedState() {
         viewModelScope.launch {
-            // If Room fails here, the heart just shows as unsaved.
+
             productRepository.observeSavedProducts().catch { }.collectLatest { products ->
                 val ids = products.mapTo(mutableSetOf()) { it.id }
                 _uiState.update { it.copy(isSaved = productId in ids) }

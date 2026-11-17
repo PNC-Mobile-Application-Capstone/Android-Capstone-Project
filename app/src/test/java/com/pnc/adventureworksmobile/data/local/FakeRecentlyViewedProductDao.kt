@@ -20,4 +20,9 @@ class FakeRecentlyViewedProductDao: RecentlyViewedProductDao {
         calls += "trim"
     }
 
+    override suspend fun clearAll() {
+        calls += "clear"
+        recent.value = emptyList()
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.pnc.adventureworksmobile.presentation.saved
 
+import java.math.BigDecimal
 import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.domain.model.ProductDetails
 import com.pnc.adventureworksmobile.domain.repository.ProductRepository
@@ -102,6 +103,8 @@ private class FakeProductRepository(
     override suspend fun recordRecentlyViewed(product: ProductDetails) = Unit
 
     override fun observeRecentlyViewedProducts(): Flow<List<Product>> = flowOf(emptyList())
+
+    override suspend fun clearRecentlyViewed() = Unit
 }
 
 private fun product(id: Int) = Product(
@@ -110,5 +113,5 @@ private fun product(id: Int) = Product(
     productNumber = "P-$id",
     thumbnailBase64 = null,
     thumbnailPhotoFileName = null,
-    listPrice = id * 10.0,
+    listPrice = BigDecimal.valueOf(id * 10L),
 )

@@ -21,6 +21,8 @@ class FakeProductRepository : ProductRepository {
     val savedCalls = mutableListOf<Product>()
     val removedIds = mutableListOf<Int>()
     val recordedViews = mutableListOf<ProductDetails>()
+    var clearRecentlyViewedCalls = 0
+        private set
 
     override suspend fun getProducts(): Result<List<Product>> {
         getProductsCalls++
@@ -49,4 +51,9 @@ class FakeProductRepository : ProductRepository {
     }
 
     override fun observeRecentlyViewedProducts(): Flow<List<Product>> = recentlyViewed
+
+    override suspend fun clearRecentlyViewed() {
+        clearRecentlyViewedCalls++
+        recentlyViewed.value = emptyList()
+    }
 }
