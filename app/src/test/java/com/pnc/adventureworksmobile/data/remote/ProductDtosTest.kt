@@ -1,5 +1,6 @@
 package com.pnc.adventureworksmobile.data.remote
 
+import java.math.BigDecimal
 import com.pnc.adventureworksmobile.domain.model.ProductDetails
 import com.pnc.adventureworksmobile.testutil.builders.aProductDetailsDto
 import com.pnc.adventureworksmobile.testutil.builders.aProductListDto
@@ -37,7 +38,7 @@ class ProductDtosTest {
         assertEquals(707, product.id)
         assertEquals("Sport-100 Helmet, Red", product.name)
         assertEquals("HL-U509-R", product.productNumber)
-        assertEquals(34.99, product.listPrice, 0.0)
+        assertEquals(BigDecimal("34.99"), product.listPrice)
         assertNull(product.thumbnailBase64)
     }
 
@@ -76,7 +77,7 @@ class ProductDtosTest {
 
         val product = dto.toDomain()
 
-        assertEquals(0.0, product.listPrice, 0.0)
+        assertEquals(BigDecimal.ZERO, product.listPrice)
     }
 
     @Test
@@ -129,7 +130,7 @@ class ProductDtosTest {
         assertEquals("", product.productNumber)
         assertNull(product.thumbnailBase64)
         assertNull(product.thumbnailPhotoFileName)
-        assertEquals(0.0, product.listPrice, 0.0)
+        assertEquals(BigDecimal.ZERO, product.listPrice)
     }
 
     @Test
@@ -154,7 +155,7 @@ class ProductDtosTest {
 
         assertEquals(listOf(1, 2), products.map { it.id })
         assertEquals(listOf("First", "Second"), products.map { it.name })
-        assertEquals(listOf(1.5, 2.5), products.map { it.listPrice })
+        assertEquals(listOf(BigDecimal("1.5"), BigDecimal("2.5")), products.map { it.listPrice })
     }
 
     @Test
@@ -195,7 +196,7 @@ class ProductDtosTest {
                 photoBase64 = "photo-base64",
                 photoFileName = "road150.gif",
                 color = "Red",
-                listPrice = 3578.27,
+                listPrice = BigDecimal("3578.27"),
                 productLine = "R",
                 productModelName = "Road-150",
                 riderExperience = "Advanced",
@@ -266,7 +267,7 @@ class ProductDtosTest {
         assertEquals("Unnamed product", details.name)
         assertEquals("", details.productNumber)
         assertEquals("", details.summary)
-        assertEquals(0.0, details.listPrice, 0.0)
+        assertEquals(BigDecimal.ZERO, details.listPrice)
         assertNull(details.photoBase64)
         assertNull(details.color)
     }

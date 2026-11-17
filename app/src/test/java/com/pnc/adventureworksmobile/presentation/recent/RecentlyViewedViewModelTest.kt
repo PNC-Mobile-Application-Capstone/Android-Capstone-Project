@@ -1,5 +1,6 @@
 package com.pnc.adventureworksmobile.presentation.recent
 
+import java.math.BigDecimal
 import app.cash.turbine.test
 import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.domain.repository.FakeProductRepository
@@ -36,7 +37,7 @@ class RecentlyViewedViewModelTest {
 
     @Test
     fun `shows recently viewed products as ui models`() = runTest {
-        val product = aProduct(id = 749, name = "Road-150 Red, 62", listPrice = 3578.27)
+        val product = aProduct(id = 749, name = "Road-150 Red, 62", listPrice = BigDecimal("3578.27"))
         repository.recentlyViewed.value = listOf(product)
 
         val viewModel = createViewModel()

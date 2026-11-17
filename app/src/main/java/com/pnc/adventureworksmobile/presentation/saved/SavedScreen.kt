@@ -32,10 +32,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.presentation.EmptyDestination
+import com.pnc.adventureworksmobile.domain.model.productCategory
 import com.pnc.adventureworksmobile.presentation.shared.ProductImage
-import com.pnc.adventureworksmobile.presentation.shared.productCategory
-import java.text.NumberFormat
-import java.util.Locale
+import com.pnc.adventureworksmobile.presentation.shared.formatPrice
 import com.pnc.adventureworksmobile.presentation.shared.ErrorView
 
 @Composable
@@ -99,7 +98,7 @@ private fun SavedProductRow(
 ) {
     val hasSnapshot = product.productNumber.isNotBlank()
     val category = if (hasSnapshot) productCategory(product.name) else "Saved item"
-    val price = NumberFormat.getCurrencyInstance(Locale.US).format(product.listPrice)
+    val price = formatPrice(product.listPrice)
 
     Card(
         modifier = Modifier

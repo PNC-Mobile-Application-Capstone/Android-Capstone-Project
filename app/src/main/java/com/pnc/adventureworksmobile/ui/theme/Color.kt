@@ -22,7 +22,6 @@ val AdventureDarkInk = Color(0xFFF4EEE6)
 val AdventureDarkMuted = Color(0xFFBDB0A3)
 val AdventureDarkOutline = Color(0xFF4B4035)
 
-// Modern Plain palette — available as an alternate theme in Theme.kt.
 val ModernPlainPrimary = Color(0xFF202124)
 val ModernPlainPrimaryContainer = Color(0xFFE5E7EB)
 val ModernPlainSecondary = Color(0xFF5F6368)

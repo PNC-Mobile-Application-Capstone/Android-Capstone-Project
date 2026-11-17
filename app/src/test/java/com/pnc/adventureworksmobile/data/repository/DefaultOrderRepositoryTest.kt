@@ -17,8 +17,6 @@ class DefaultOrderRepositoryTest {
     private val api = FakeOrderApi()
     private val repository = DefaultOrderRepository(api)
 
-    // getOrders
-
     @Test
     fun `only returns lines for the requested customer`() = runTest {
         api.orders = listOf(
@@ -71,8 +69,6 @@ class DefaultOrderRepositoryTest {
         assertTrue(result.isFailure)
         assertEquals(AppError.NoConnection, result.exceptionOrNull()!!.asAppError())
     }
-
-    // getOrder
 
     @Test
     fun `getOrder asks the API for that order id`() = runTest {

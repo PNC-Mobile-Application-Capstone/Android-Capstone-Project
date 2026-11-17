@@ -21,7 +21,7 @@ fun ProductDetails.toRecentlyViewedEntity(viewedAtEpochMillis: Long) = RecentlyV
     viewedAtEpochMillis = viewedAtEpochMillis,
     name = name,
     productNumber = productNumber,
-    listPrice = listPrice,
+    listPrice = listPrice.toMoneyColumn(),
     photoBase64 = photoBase64,
     photoFileName = photoFileName,
 )
@@ -32,5 +32,5 @@ fun RecentlyViewedProductEntity.toProduct() = Product(
     productNumber = productNumber,
     thumbnailBase64 = photoBase64,
     thumbnailPhotoFileName = photoFileName,
-    listPrice = listPrice,
+    listPrice = listPrice.toMoney(),
 )

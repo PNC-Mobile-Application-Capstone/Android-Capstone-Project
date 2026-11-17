@@ -18,4 +18,7 @@ interface RecentlyViewedProductDao {
             "(SELECT productId FROM recently_viewed_products ORDER BY viewedAtEpochMillis DESC LIMIT 10)",
     )
     suspend fun trimToLatestTen()
+
+    @Query("DELETE FROM recently_viewed_products")
+    suspend fun clearAll()
 }

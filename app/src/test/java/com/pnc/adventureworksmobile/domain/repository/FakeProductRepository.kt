@@ -49,4 +49,12 @@ class FakeProductRepository : ProductRepository {
     }
 
     override fun observeRecentlyViewedProducts(): Flow<List<Product>> = recentlyViewed
+
+    var clearRecentlyViewedCalls = 0
+        private set
+
+    override suspend fun clearRecentlyViewed() {
+        clearRecentlyViewedCalls++
+        recentlyViewed.value = emptyList()
+    }
 }

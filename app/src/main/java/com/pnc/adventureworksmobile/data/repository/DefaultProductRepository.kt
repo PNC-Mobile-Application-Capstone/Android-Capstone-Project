@@ -5,6 +5,7 @@ import com.pnc.adventureworksmobile.data.local.RecentlyViewedProductDao
 import com.pnc.adventureworksmobile.data.local.toProduct
 import com.pnc.adventureworksmobile.data.local.toRecentlyViewedEntity
 import com.pnc.adventureworksmobile.data.local.SavedProductDao
+import com.pnc.adventureworksmobile.data.local.toMoneyColumn
 import com.pnc.adventureworksmobile.data.local.toSavedProductEntity
 import com.pnc.adventureworksmobile.data.remote.ProductApi
 import com.pnc.adventureworksmobile.data.remote.toDomain
@@ -27,7 +28,7 @@ class DefaultProductRepository(
                     productId = product.id,
                     name = product.name,
                     productNumber = product.productNumber,
-                    listPrice = product.listPrice,
+                    listPrice = product.listPrice.toMoneyColumn(),
                     thumbnailBase64 = product.thumbnailBase64,
                     thumbnailPhotoFileName = product.thumbnailPhotoFileName,
                 )
@@ -55,6 +56,10 @@ class DefaultProductRepository(
             product.toRecentlyViewedEntity(viewedAtEpochMillis = System.currentTimeMillis()),
         )
         recentlyViewedProductDao.trimToLatestTen()
+    }
+
+    override suspend fun clearRecentlyViewed() {
+        recentlyViewedProductDao.clearAll()
     }
 
     override fun observeRecentlyViewedProducts(): Flow<List<Product>> =

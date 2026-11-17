@@ -1,5 +1,6 @@
 package com.pnc.adventureworksmobile.data.repository
 
+import java.math.BigDecimal
 import com.pnc.adventureworksmobile.testutil.builders.aProduct
 
 import app.cash.turbine.test
@@ -54,7 +55,6 @@ class DefaultProductRepositoryTest {
         photoFileName = null,
     )
 
-    // getProducts
     @Test
     fun `getProducts maps every product from the API`() = runTest {
         api.products = listOf(
@@ -87,14 +87,14 @@ class DefaultProductRepositoryTest {
     @Test
     fun `getProducts refreshes the snapshot of products that are saved`() = runTest {
         savedDao.saved.value = listOf(savedRow(749, name = "Old name", listPrice = 1.0))
-        api.products = listOf(aProductListDto(productId = 749, name = "New name", listPrice = 99.0))
+        api.products = listOf(aProductListDto(productId = 749, name = "New name", listPrice = BigDecimal("99.00")))
 
         repository.getProducts()
 
         val row = savedDao.saved.value.single()
         assertEquals("New name", row.name)
         assertEquals(99.0, row.listPrice, 0.0)
-        assertEquals(1_000L, row.savedAtEpochMillis)   // keeps when it was originally saved
+        assertEquals(1_000L, row.savedAtEpochMillis)
     }
 
     @Test
@@ -107,8 +107,6 @@ class DefaultProductRepositoryTest {
         assertEquals(listOf(749), savedDao.saved.value.map { it.productId })
     }
 
-
-    // getProduct
     @Test
     fun `getProduct asks the API for that product id`() = runTest {
         repository.getProduct(productId = 749)
@@ -135,15 +133,13 @@ class DefaultProductRepositoryTest {
         assertEquals(749, api.lastProductId)
     }
 
-
-    // setSaved
     @Test
     fun `saving a product stores a snapshot of it`() = runTest {
         val product = aProduct(
             id = 749,
             name = "Road-150 Red, 62",
             productNumber = "BK-R93R-62",
-            listPrice = 3578.27,
+            listPrice = BigDecimal("3578.27"),
             thumbnailBase64 = "thumbnail-base64",
             thumbnailPhotoFileName = "road150.gif",
         )
@@ -193,12 +189,9 @@ class DefaultProductRepositoryTest {
         assertTrue(recentDao.calls.isEmpty())
     }
 
-
-    // recordRecentlyViewed
-
     @Test
     fun `recording a view stores the product`() = runTest {
-        val details = aProductDetails(id = 749, name = "Road-150 Red, 62", listPrice = 3578.27)
+        val details = aProductDetails(id = 749, name = "Road-150 Red, 62", listPrice = BigDecimal("3578.27"))
 
         repository.recordRecentlyViewed(details)
 
@@ -226,8 +219,6 @@ class DefaultProductRepositoryTest {
         assertEquals(listOf("record 749", "trim"), recentDao.calls)
     }
 
-
-    // observeSavedProductIds
     @Test
     fun `saved products start out empty`() = runTest {
         repository.observeSavedProducts().test {
@@ -281,7 +272,6 @@ class DefaultProductRepositoryTest {
             assertEquals("db closed", awaitError().message)
         }
     }
-
 
     // observeRecentlyViewedProducts
     @Test

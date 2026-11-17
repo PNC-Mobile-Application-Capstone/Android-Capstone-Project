@@ -16,8 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-// One error layout for every screen, based on the Catalog's original error view.
-// Message text plus a "Try again" button. Detail screens can add a title and a back action.
 @Composable
 fun ErrorView(
     message: String,

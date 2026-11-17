@@ -32,10 +32,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pnc.adventureworksmobile.domain.model.ProductDetails
+import com.pnc.adventureworksmobile.domain.model.availability
+import com.pnc.adventureworksmobile.domain.model.productCategory
+import com.pnc.adventureworksmobile.presentation.shared.AvailabilityChip
 import com.pnc.adventureworksmobile.presentation.shared.ProductImage
-import com.pnc.adventureworksmobile.presentation.shared.productCategory
-import java.text.NumberFormat
-import java.util.Locale
+import com.pnc.adventureworksmobile.presentation.shared.formatPrice
 import com.pnc.adventureworksmobile.presentation.shared.ErrorView
 
 @Composable
@@ -139,10 +140,14 @@ private fun ProductDetailContent(
             fontWeight = FontWeight.Bold,
         )
         Text(
-            text = NumberFormat.getCurrencyInstance(Locale.US).format(product.listPrice),
+            text = formatPrice(product.listPrice),
             modifier = Modifier.padding(top = 10.dp),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
+        )
+        AvailabilityChip(
+            availability = product.availability,
+            modifier = Modifier.padding(top = 10.dp),
         )
 
         if (product.summary.isNotBlank()) {
