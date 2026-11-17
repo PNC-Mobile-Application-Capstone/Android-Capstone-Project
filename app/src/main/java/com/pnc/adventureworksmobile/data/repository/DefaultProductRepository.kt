@@ -52,10 +52,9 @@ class DefaultProductRepository(
     }
 
     override suspend fun recordRecentlyViewed(product: ProductDetails) {
-        recentlyViewedProductDao.record(
+        recentlyViewedProductDao.recordAndTrim(
             product.toRecentlyViewedEntity(viewedAtEpochMillis = System.currentTimeMillis()),
         )
-        recentlyViewedProductDao.trimToLatestTen()
     }
 
     override suspend fun clearRecentlyViewed() {
@@ -64,4 +63,5 @@ class DefaultProductRepository(
 
     override fun observeRecentlyViewedProducts(): Flow<List<Product>> =
         recentlyViewedProductDao.observeAll().map { entries -> entries.map { it.toProduct() } }
+
 }

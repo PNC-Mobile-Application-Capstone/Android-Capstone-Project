@@ -52,25 +52,12 @@ fun RecentlyViewedScreen(
     var showClearDialog by rememberSaveable { mutableStateOf(false) }
 
     if (showClearDialog) {
-        AlertDialog(
-            onDismissRequest = { showClearDialog = false },
-            title = { Text("Clear recently viewed?") },
-            text = { Text("This removes your browsing history on this phone. Your saved products stay saved.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showClearDialog = false
-                        onClearHistory()
-                    },
-                ) {
-                    Text("Clear")
-                }
+        ClearHistoryDialog(
+            onConfirm = {
+                showClearDialog = false
+                onClearHistory()
             },
-            dismissButton = {
-                TextButton(onClick = { showClearDialog = false }) {
-                    Text("Cancel")
-                }
-            },
+            onDismiss = { showClearDialog = false },
         )
     }
 
@@ -103,7 +90,10 @@ fun RecentlyViewedScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
                         text = "Recently viewed",
                         modifier = Modifier
@@ -113,14 +103,14 @@ fun RecentlyViewedScreen(
                         fontWeight = FontWeight.Bold,
                     )
                     TextButton(onClick = { showClearDialog = true }) {
-                        Text("Clear")
+                        Text("Clear history")
                     }
                 }
-                if (uiState.errorMessage != null) {
+            }
+            if (uiState.errorMessage != null) {
+                item {
                     Text(
                         text = uiState.errorMessage,
-                        modifier = Modifier.padding(top = 4.dp),
-                        color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -195,4 +185,22 @@ private fun RecentProductRow(
             }
         }
     }
+}
+
+@Composable
+private fun ClearHistoryDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Clear recently viewed?") },
+        text = { Text("This removes every product from your history. Your saved products stay.") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text("Clear") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        },
+    )
 }

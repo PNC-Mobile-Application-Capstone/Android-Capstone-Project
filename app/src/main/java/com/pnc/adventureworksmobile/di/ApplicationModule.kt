@@ -19,6 +19,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -48,6 +49,10 @@ object ApplicationModule {
         }
 
         return OkHttpClient.Builder()
+            .connectTimeout(NetworkTimeouts.CONNECT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(NetworkTimeouts.READ_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(NetworkTimeouts.WRITE_SECONDS, TimeUnit.SECONDS)
+            .callTimeout(NetworkTimeouts.CALL_SECONDS, TimeUnit.SECONDS)
             .addInterceptor(logging)
             .build()
     }
@@ -105,4 +110,14 @@ object ApplicationModule {
     fun provideRecentlyViewedProductDao(
         database: AdventureWorksDatabase,
     ): RecentlyViewedProductDao = database.recentlyViewedProductDao()
+}
+
+internal object NetworkTimeouts {
+    const val CONNECT_SECONDS = 10L
+
+    const val READ_SECONDS = 20L
+
+    const val WRITE_SECONDS = 20L
+
+    const val CALL_SECONDS = 30L
 }

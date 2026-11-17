@@ -220,6 +220,19 @@ class DefaultProductRepositoryTest {
     }
 
     @Test
+    fun `clearing recently viewed only clears the recent table`() = runTest {
+        recentDao.recent.value = listOf(recentRow(749), recentRow(750))
+        savedDao.saved.value = listOf(savedRow(680))
+
+        repository.clearRecentlyViewed()
+
+        assertEquals(listOf("clear"), recentDao.calls)
+        assertTrue(recentDao.recent.value.isEmpty())
+        assertEquals(listOf(680), savedDao.saved.value.map { it.productId })
+    }
+
+
+    @Test
     fun `saved products start out empty`() = runTest {
         repository.observeSavedProducts().test {
             assertTrue(awaitItem().isEmpty())
@@ -273,7 +286,6 @@ class DefaultProductRepositoryTest {
         }
     }
 
-    // observeRecentlyViewedProducts
     @Test
     fun `recently viewed entries come back as products`() = runTest {
         recentDao.recent.value = listOf(recentRow(749))
