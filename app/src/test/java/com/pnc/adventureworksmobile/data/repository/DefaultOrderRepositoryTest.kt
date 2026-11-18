@@ -4,6 +4,7 @@ import com.pnc.adventureworksmobile.data.remote.FakeOrderApi
 import com.pnc.adventureworksmobile.data.remote.toDomain
 import com.pnc.adventureworksmobile.testutil.builders.anOrderDetailsDto
 import com.pnc.adventureworksmobile.testutil.builders.anOrderListDto
+import com.pnc.adventureworksmobile.testutil.builders.anOrderLine
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.runTest
@@ -17,6 +18,8 @@ class DefaultOrderRepositoryTest {
     private val api = FakeOrderApi()
     private val repository = DefaultOrderRepository(api)
 
+    // getOrderLines
+
     @Test
     fun `only returns lines for the requested customer`() = runTest {
         api.orders = listOf(
@@ -25,7 +28,7 @@ class DefaultOrderRepositoryTest {
             anOrderListDto(id = 3, customerId = 11711),
         )
 
-        val orders = repository.getOrders(customerId = 11711).getOrThrow()
+        val orders = repository.getOrderLines(customerId = 11711).getOrThrow()
 
         assertEquals(listOf(1, 3), orders.map { it.id })
     }
@@ -34,7 +37,7 @@ class DefaultOrderRepositoryTest {
     fun `returns an empty list when the customer has no orders`() = runTest {
         api.orders = listOf(anOrderListDto(customerId = 99))
 
-        val orders = repository.getOrders(customerId = 11_711).getOrThrow()
+        val orders = repository.getOrderLines(customerId = 11_711).getOrThrow()
 
         assertTrue(orders.isEmpty())
     }
@@ -48,14 +51,14 @@ class DefaultOrderRepositoryTest {
         )
         api.orders = listOf(line)
 
-        val orders = repository.getOrders(customerId = 11711).getOrThrow()
+        val orders = repository.getOrderLines(customerId = 11711).getOrThrow()
 
         assertEquals(listOf(line.toDomain()), orders)
     }
 
     @Test
     fun `asks the API once per call`() = runTest {
-        repository.getOrders(customerId = 11711)
+        repository.getOrderLines(customerId = 11711)
 
         assertEquals(1, api.getOrdersCalls)
     }
@@ -64,33 +67,38 @@ class DefaultOrderRepositoryTest {
     fun `an API error comes back as a failed Result instead of throwing`() = runTest {
         api.failure = IOException("offline")
 
-        val result = repository.getOrders(customerId = 11711)
+        val result = repository.getOrderLines(customerId = 11711)
 
         assertTrue(result.isFailure)
         assertEquals(AppError.NoConnection, result.exceptionOrNull()!!.asAppError())
     }
 
+    // getOrderLineDetails
+
     @Test
-    fun `getOrder asks the API for that order id`() = runTest {
-        repository.getOrder(orderId = 43_659)
+    fun `getOrderLineDetails asks the API for order ids`() = runTest {
+        val inputLine = anOrderLine(id = 43_659)
+        repository.getOrderLineDetails(listOf(inputLine))
 
         assertEquals(43_659, api.lastOrderId)
     }
 
     @Test
-    fun `getOrder returns the mapped details`() = runTest {
+    fun `getOrderLineDetails returns the mapped details`() = runTest {
         api.orderDetails = anOrderDetailsDto(id = 5, productName = "Road-150 Red, 62")
+        val inputLine = anOrderLine(id = 5)
 
-        val details = repository.getOrder(orderId = 5).getOrThrow()
+        val details = repository.getOrderLineDetails(listOf(inputLine)).getOrThrow()
 
-        assertEquals(api.orderDetails.toDomain(), details)
+        assertEquals(listOf(api.orderDetails.toDomain()), details)
     }
 
     @Test
-    fun `a getOrder failure comes back as a failed Result instead of throwing`() = runTest {
+    fun `a getOrderLineDetails failure comes back as a failed Result instead of throwing`() = runTest {
         api.failure = IOException("offline")
+        val inputLine = anOrderLine(id = 43_659)
 
-        val result = repository.getOrder(orderId = 43_659)
+        val result = repository.getOrderLineDetails(listOf(inputLine))
 
         assertTrue(result.isFailure)
         assertEquals(43_659, api.lastOrderId)

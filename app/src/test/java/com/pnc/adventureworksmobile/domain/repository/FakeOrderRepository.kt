@@ -1,29 +1,29 @@
 package com.pnc.adventureworksmobile.domain.repository
 
-import com.pnc.adventureworksmobile.domain.model.Order
-import com.pnc.adventureworksmobile.domain.model.OrderDetails
-import com.pnc.adventureworksmobile.testutil.builders.anOrderDetails
+import com.pnc.adventureworksmobile.domain.model.OrderLine
+import com.pnc.adventureworksmobile.domain.model.OrderLineDetails
+import com.pnc.adventureworksmobile.testutil.builders.anOrderLineDetails
 
 class FakeOrderRepository : OrderRepository {
 
-    var ordersResult: Result<List<Order>> = Result.success(emptyList())
-    var orderDetailsResult: Result<OrderDetails> = Result.success(anOrderDetails())
+    var orderLinesResult: Result<List<OrderLine>> = Result.success(emptyList())
+    var orderLineDetailsResult: Result<List<OrderLineDetails>> = Result.success(listOf(anOrderLineDetails()))
 
-    var getOrdersCalls = 0
+    var getOrderLinesCalls = 0
         private set
     var lastCustomerId: Int? = null
         private set
-    var lastOrderId: Int? = null
+    var lastOrderLines: List<OrderLine>? = null
         private set
 
-    override suspend fun getOrders(customerId: Int): Result<List<Order>> {
-        getOrdersCalls++
+    override suspend fun getOrderLines(customerId: Int): Result<List<OrderLine>> {
+        getOrderLinesCalls++
         lastCustomerId = customerId
-        return ordersResult
+        return orderLinesResult
     }
 
-    override suspend fun getOrder(orderId: Int): Result<OrderDetails> {
-        lastOrderId = orderId
-        return orderDetailsResult
+    override suspend fun getOrderLineDetails(orderLines: List<OrderLine>): Result<List<OrderLineDetails>> {
+        lastOrderLines = orderLines
+        return orderLineDetailsResult
     }
 }

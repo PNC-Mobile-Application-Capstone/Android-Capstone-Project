@@ -1,7 +1,7 @@
 package com.pnc.adventureworksmobile.data.remote
 
-import com.pnc.adventureworksmobile.domain.model.Order
-import com.pnc.adventureworksmobile.domain.model.OrderDetails
+import com.pnc.adventureworksmobile.domain.model.OrderLine
+import com.pnc.adventureworksmobile.domain.model.OrderLineDetails
 import com.pnc.adventureworksmobile.testutil.builders.anOrderListDto
 import com.pnc.adventureworksmobile.testutil.builders.anOrderDetailsDto
 import junit.framework.TestCase.assertEquals
@@ -40,7 +40,7 @@ class OrderDtosTest {
         val order = dto.toDomain()
 
         assertEquals(
-            Order(
+            OrderLine(
                 id = 1,
                 customerId = 11711,
                 firstName = "Daniel",
@@ -219,7 +219,7 @@ class OrderDtosTest {
         val details = dto.toDomain()
 
         assertEquals(
-            OrderDetails(
+            OrderLineDetails(
                 id = 101,
                 customerId = 11711,
                 firstName = "Daniel",

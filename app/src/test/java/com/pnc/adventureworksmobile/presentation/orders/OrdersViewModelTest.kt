@@ -3,11 +3,11 @@ package com.pnc.adventureworksmobile.presentation.orders
 import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import com.pnc.adventureworksmobile.core.session.FakeDemoCustomerSession
-import com.pnc.adventureworksmobile.domain.model.Order
+import com.pnc.adventureworksmobile.domain.model.OrderLine
 import com.pnc.adventureworksmobile.domain.repository.FakeOrderRepository
 import com.pnc.adventureworksmobile.domain.repository.OrderRepository
 import com.pnc.adventureworksmobile.testutil.MainDispatcherRule
-import com.pnc.adventureworksmobile.testutil.builders.anOrder
+import com.pnc.adventureworksmobile.testutil.builders.anOrderLine
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -52,18 +52,19 @@ class OrdersViewModelTest {
 
     @Test
     fun `shows the orders once loaded`() = runTest {
-        val orders = listOf(anOrder(id = 1), anOrder(id = 2))
-        repository.ordersResult = Result.success(orders)
+        val lines = listOf(anOrderLine(id = 1, orderNumber = 1), anOrderLine(id = 2, orderNumber = 2))
+        repository.orderLinesResult = Result.success(lines)
 
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        assertEquals(OrdersUiState(isLoading = false, orders = orders), viewModel.uiState.value)
+        val expectedOrders = viewModel.getOrdersFromOrderLines(lines)
+        assertEquals(OrdersUiState(isLoading = false, orders = expectedOrders), viewModel.uiState.value)
     }
 
     @Test
     fun `shows the error message when loading fails`() = runTest {
-        repository.ordersResult = Result.failure(AppException(AppError.NoConnection))
+        repository.orderLinesResult = Result.failure(AppException(AppError.NoConnection))
 
         val viewModel = createViewModel()
         advanceUntilIdle()
@@ -76,7 +77,7 @@ class OrdersViewModelTest {
 
     @Test
     fun `an unwrapped error shows the generic message, not raw text`() = runTest {
-        repository.ordersResult = Result.failure(IOException("java.net.UnknownHostException"))
+        repository.orderLinesResult = Result.failure(IOException("java.net.UnknownHostException"))
 
         val viewModel = createViewModel()
         advanceUntilIdle()
@@ -89,7 +90,7 @@ class OrdersViewModelTest {
 
     @Test
     fun `a server error gets its own message`() = runTest {
-        repository.ordersResult = Result.failure(AppException(AppError.Server(500)))
+        repository.orderLinesResult = Result.failure(AppException(AppError.Server(500)))
 
         val viewModel = createViewModel()
         advanceUntilIdle()
@@ -102,42 +103,46 @@ class OrdersViewModelTest {
 
     @Test
     fun `retrying after a failure shows loading again, the nthe orders`() = runTest {
-        val orders = listOf(anOrder(id = 1))
-        repository.ordersResult = Result.failure(AppException(AppError.NoConnection))
+        val lines = listOf(anOrderLine(id = 1, orderNumber = 1))
+        repository.orderLinesResult = Result.failure(AppException(AppError.NoConnection))
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
             assertEquals(OrdersUiState(isLoading = true), awaitItem())
             assertEquals(OrdersUiState(isLoading = false, errorMessage = ordersError), awaitItem())
 
-            repository.ordersResult = Result.success(orders)
+            repository.orderLinesResult = Result.success(lines)
             viewModel.loadOrders()
 
             assertEquals(OrdersUiState(isLoading = true), awaitItem())
-            assertEquals(OrdersUiState(isLoading = false, orders = orders), awaitItem())
+            val expectedOrders = viewModel.getOrdersFromOrderLines(lines)
+            assertEquals(OrdersUiState(isLoading = false, orders = expectedOrders), awaitItem())
         }
     }
 
     @Test
     fun `a failed reload keeps the orders already shown`() = runTest {
-        val orders = listOf(anOrder(id = 1))
-        repository.ordersResult = Result.success(orders)
+        val lines = listOf(anOrderLine(id = 1, orderNumber = 1))
+        repository.orderLinesResult = Result.success(lines)
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        repository.ordersResult = Result.failure(AppException(AppError.NoConnection))
+        val expectedOrders = viewModel.getOrdersFromOrderLines(lines)
+
+        repository.orderLinesResult = Result.failure(AppException(AppError.NoConnection))
         viewModel.loadOrders()
         advanceUntilIdle()
 
-        assertEquals(OrdersUiState(isLoading = false, orders = orders, errorMessage = ordersError),
-        viewModel.uiState.value
+        assertEquals(
+            OrdersUiState(isLoading = false, orders = expectedOrders, errorMessage = ordersError),
+            viewModel.uiState.value
         )
     }
 
     @Test
     fun `does not report an error if cancelled mid-load`() = runTest {
         val slowRepository = object : OrderRepository by FakeOrderRepository() {
-            override suspend fun getOrders(customerId: Int): Result<List<Order>> {
+            override suspend fun getOrderLines(customerId: Int): Result<List<OrderLine>> {
                 delay(5000)
                 return Result.success(emptyList())
             }
