@@ -2,6 +2,8 @@ package com.pnc.adventureworksmobile.testutil.builders
 
 import com.pnc.adventureworksmobile.domain.model.Order
 import com.pnc.adventureworksmobile.domain.model.OrderDetails
+import com.pnc.adventureworksmobile.domain.model.OrderLine
+import com.pnc.adventureworksmobile.domain.model.OrderLineDetails
 import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.domain.model.ProductDetails
 
@@ -12,14 +14,14 @@ fun aProduct(
     productNumber: String = "TP-001",
     thumbnailBase64: String? = "thumbnail-base64",
     thumbnailPhotoFileName: String? = "thumbnail.gif",
-    listPrice: Double = 10.0
+    listPrice: Double = 10.0,
 ) = Product(
     id = id,
     name = name,
     productNumber = productNumber,
     thumbnailBase64 = thumbnailBase64,
     thumbnailPhotoFileName = thumbnailPhotoFileName,
-    listPrice = listPrice
+    listPrice = listPrice,
 )
 
 fun aProductDetails(
@@ -60,7 +62,7 @@ fun aProductDetails(
     maintenanceDescription = maintenanceDescription,
 )
 
-fun anOrder(
+fun anOrderLine(
     id: Int = 1,
     customerId: Int = 11_711,
     firstName: String? = "Daniel",
@@ -74,7 +76,7 @@ fun anOrder(
     orderQty: Int = 2,
     unitPrice: Double = 10.0,
     lineTotal: Double = orderQty * unitPrice,
-) = Order(
+) = OrderLine(
     id = id,
     customerId = customerId,
     firstName = firstName,
@@ -90,7 +92,29 @@ fun anOrder(
     lineTotal = lineTotal,
 )
 
-fun anOrderDetails(
+fun anOrder(
+    orderNumber: Int = 43_659,
+    customerId: Int = 11_711,
+    firstName: String? = "Daniel",
+    middleName: String? = "M",
+    lastName: String? = "Davis",
+    suffix: String? = "Jr.",
+    orderDate: String = "2003-09-25T00:00:00",
+    shipDate: String? = "2003-10-02T00:00:00",
+    orderLines: List<OrderLine> = listOf(anOrderLine(orderNumber = orderNumber, customerId = customerId)),
+) = Order(
+    orderNumber = orderNumber,
+    customerId = customerId,
+    firstName = firstName,
+    middleName = middleName,
+    lastName = lastName,
+    suffix = suffix,
+    orderDate = orderDate,
+    shipDate = shipDate,
+    orderLines = orderLines,
+)
+
+fun anOrderLineDetails(
     id: Int = 1,
     customerId: Int = 11_711,
     firstName: String? = "Daniel",
@@ -114,7 +138,7 @@ fun anOrderDetails(
     unitPrice: Double = 10.0,
     unitPriceDiscount: Double = 0.0,
     lineTotal: Double = orderQty * unitPrice * (1 - unitPriceDiscount),
-) = OrderDetails(
+) = OrderLineDetails(
     id = id,
     customerId = customerId,
     firstName = firstName,
@@ -138,4 +162,61 @@ fun anOrderDetails(
     unitPrice = unitPrice,
     unitPriceDiscount = unitPriceDiscount,
     lineTotal = lineTotal,
+)
+
+fun anOrderDetails(
+    customerId: Int = 11_711,
+    firstName: String? = "Daniel",
+    middleName: String? = "M",
+    lastName: String? = "Davis",
+    suffix: String? = "Jr.",
+    phoneNumber: String? = "123-456-7890",
+    phoneNumberType: String? = "Cell",
+    emailAddress: String? = "daniel.davis@example.com",
+    orderNumber: Int = 43_659,
+    orderDate: String = "2003-09-25T00:00:00",
+    shipDate: String? = "2003-10-02T00:00:00",
+    freight: Double = 5.0,
+    freightNumber: Int = 3,
+    shipMethodName: String? = "CARGO TRANSPORT 5",
+    taxAmt: Double = 0.8,
+    carrierTrackingNumber: String? = "4911-403C-98",
+    orderLineDetails: List<OrderLineDetails> = listOf(
+        anOrderLineDetails(
+            customerId = customerId,
+            firstName = firstName,
+            middleName = middleName,
+            lastName = lastName,
+            suffix = suffix,
+            phoneNumber = phoneNumber,
+            phoneNumberType = phoneNumberType,
+            emailAddress = emailAddress,
+            orderNumber = orderNumber,
+            orderDate = orderDate,
+            shipDate = shipDate,
+            freight = freight,
+            freightNumber = freightNumber,
+            shipMethodName = shipMethodName,
+            taxAmt = taxAmt,
+            carrierTrackingNumber = carrierTrackingNumber,
+        )
+    ),
+) = OrderDetails(
+    customerId = customerId,
+    firstName = firstName,
+    middleName = middleName,
+    lastName = lastName,
+    suffix = suffix,
+    phoneNumber = phoneNumber,
+    phoneNumberType = phoneNumberType,
+    emailAddress = emailAddress,
+    orderNumber = orderNumber,
+    orderDate = orderDate,
+    shipDate = shipDate,
+    freight = freight,
+    freightNumber = freightNumber,
+    shipMethodName = shipMethodName,
+    taxAmt = taxAmt,
+    carrierTrackingNumber = carrierTrackingNumber,
+    orderLineDetails = orderLineDetails,
 )

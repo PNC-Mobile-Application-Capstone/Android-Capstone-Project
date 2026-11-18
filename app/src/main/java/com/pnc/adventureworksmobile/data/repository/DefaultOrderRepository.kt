@@ -4,7 +4,7 @@ import com.pnc.adventureworksmobile.data.error.safeCall
 import com.pnc.adventureworksmobile.data.remote.OrderApi
 import com.pnc.adventureworksmobile.data.remote.toDomain
 import com.pnc.adventureworksmobile.domain.model.OrderLine
-import com.pnc.adventureworksmobile.domain.model.OrderDetails
+import com.pnc.adventureworksmobile.domain.model.OrderLineDetails
 import com.pnc.adventureworksmobile.domain.repository.OrderRepository
 
 class DefaultOrderRepository(
@@ -16,7 +16,7 @@ class DefaultOrderRepository(
             .map { it.toDomain() }
     }
 
-    override suspend fun getOrder(orderId: Int): Result<OrderDetails> = safeCall {
-        api.getOrder(orderId).toDomain()
+    override suspend fun getOrderLineDetails(orderLines: List<OrderLine>): Result<List<OrderLineDetails>> = safeCall {
+        orderLines.map { api.getOrder(it.id).toDomain() }
     }
 }

@@ -151,9 +151,10 @@ fun AdventureWorksApp() {
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 OrdersScreen(
                     uiState = uiState,
-                    onOrderClick = { orderId ->
-                        navController.navigate("order/$orderId")
+                    onOrderClick = { order ->
+                        navController.navigate("order/${order.orderNumber}")
                     },
+                    onSortSelected = viewModel::onSortSelected,
                     onRetry = viewModel::loadOrders,
                 )
             }

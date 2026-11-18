@@ -16,11 +16,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+enum class OrderSort(val label: String) {
+    Newest("Newest first"),
+    Oldest("Oldest first"),
+}
+
 data class OrdersUiState(
     val isLoading: Boolean = false,
     val orders: List<Order> = emptyList(),
+    val selectedSort: OrderSort = OrderSort.Newest,
     val errorMessage: String? = null,
-)
+) {
+    val userFirstName: String?
+        get() = orders.firstNotNullOfOrNull { it.firstName?.takeIf { name -> name.isNotBlank() } }
+}
 
 @HiltViewModel
 class OrdersViewModel @Inject constructor(
@@ -40,10 +49,12 @@ class OrdersViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             orderRepository.getOrderLines(session.activeCustomer.id)
                 .onSuccess { orderLines ->
+                    val rawOrders = getOrdersFromOrderLines(orderLines)
+                    val sortedOrders = sortOrders(rawOrders, _uiState.value.selectedSort)
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            orders = getOrdersFromOrderLines(orderLines),
+                            orders = sortedOrders,
                             errorMessage = null,
                         )
                     }
@@ -59,15 +70,30 @@ class OrdersViewModel @Inject constructor(
         }
     }
 
+    fun onSortSelected(sort: OrderSort) {
+        _uiState.update { state ->
+            state.copy(
+                selectedSort = sort,
+                orders = sortOrders(state.orders, sort),
+            )
+        }
+    }
+
+    private fun sortOrders(orders: List<Order>, sort: OrderSort): List<Order> {
+        return when (sort) {
+            OrderSort.Newest -> orders.sortedByDescending { it.orderDate }
+            OrderSort.Oldest -> orders.sortedBy { it.orderDate }
+        }
+    }
+
     fun getOrdersFromOrderLines(orderLines: List<OrderLine>): List<Order> {
         val orders: MutableList<Order> = mutableListOf()
         orderLines.forEach { thisOrderLine ->
             // if we can find an Order in the new list, add to it; otherwise, create a new Order
-            val currentOrder: Order? = orders.find {it.orderNumber == thisOrderLine.orderNumber}
+            val currentOrder: Order? = orders.find { it.orderNumber == thisOrderLine.orderNumber }
             if (currentOrder != null) {
                 currentOrder.orderLines += thisOrderLine
-            }
-            else {
+            } else {
                 // create a list, then add this OrderLine as its first object
                 val newOrderLineList = mutableListOf<OrderLine>()
                 newOrderLineList.add(thisOrderLine)
@@ -81,7 +107,8 @@ class OrdersViewModel @Inject constructor(
                     suffix = thisOrderLine.suffix,
                     orderDate = thisOrderLine.orderDate,
                     shipDate = thisOrderLine.shipDate,
-                    orderLines = newOrderLineList
+                    statusName = thisOrderLine.statusName,
+                    orderLines = newOrderLineList,
                 )
                 orders.add(newOrder)
             }
