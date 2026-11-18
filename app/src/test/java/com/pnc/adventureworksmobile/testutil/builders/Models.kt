@@ -1,5 +1,6 @@
 package com.pnc.adventureworksmobile.testutil.builders
 
+import java.math.BigDecimal
 import com.pnc.adventureworksmobile.domain.model.Order
 import com.pnc.adventureworksmobile.domain.model.OrderDetails
 import com.pnc.adventureworksmobile.domain.model.OrderLine
@@ -32,7 +33,7 @@ fun aProductDetails(
     photoBase64: String? = "photo-base64",
     photoFileName: String? = "photo.gif",
     color: String? = "Red",
-    listPrice: Double = 10.0,
+    listPrice: BigDecimal = BigDecimal("10.00"),
     productLine: String? = null,
     productModelName: String? = null,
     riderExperience: String? = null,

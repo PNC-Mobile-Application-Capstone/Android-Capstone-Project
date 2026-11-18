@@ -1,5 +1,6 @@
 package com.pnc.adventureworksmobile.data.local
 
+import java.math.BigDecimal
 import com.pnc.adventureworksmobile.domain.model.Product
 import com.pnc.adventureworksmobile.testutil.builders.aProductDetails
 import junit.framework.TestCase.assertEquals
@@ -14,7 +15,7 @@ class RecentlyViewedProductEntityTest {
             id = 749,
             name = "Road-150 Red",
             productNumber = "BK-R93R-62",
-            listPrice = 3578.27,
+            listPrice = BigDecimal("3578.27"),
             photoBase64 = "photo-base64",
             photoFileName = "road150.gif",
         )
@@ -66,7 +67,7 @@ class RecentlyViewedProductEntityTest {
                 productNumber = "BK-R93R-62",
                 thumbnailBase64 = "photo-base64",
                 thumbnailPhotoFileName = "road150.gif",
-                listPrice = 3578.27
+                listPrice = BigDecimal("3578.27"),
             ),
             product
         )
@@ -79,7 +80,7 @@ class RecentlyViewedProductEntityTest {
             id = 250208,
             name = "Road-150 Red",
             productNumber = "BK-R93R-62",
-            listPrice = 3578.27
+            listPrice = BigDecimal("3578.27"),
         )
 
         val product = details.toRecentlyViewedEntity(viewedAtEpochMillis = 1000L).toProduct()
@@ -87,7 +88,7 @@ class RecentlyViewedProductEntityTest {
         assertEquals(details.id, product.id)
         assertEquals(details.name, product.name)
         assertEquals(details.productNumber, product.productNumber)
-        assertEquals(details.listPrice, product.listPrice, 0.0)
+        assertEquals(details.listPrice, product.listPrice)
         assertEquals(details.photoBase64, product.thumbnailBase64)
         assertEquals(details.photoFileName, product.thumbnailPhotoFileName)
     }

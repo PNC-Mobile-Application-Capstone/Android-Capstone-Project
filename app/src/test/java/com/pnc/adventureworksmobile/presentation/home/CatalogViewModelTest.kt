@@ -1,8 +1,13 @@
 package com.pnc.adventureworksmobile.presentation.home
 
+import java.math.BigDecimal
 import com.pnc.adventureworksmobile.core.session.FakeDemoCustomerSession
 import com.pnc.adventureworksmobile.domain.model.Product
+import com.pnc.adventureworksmobile.domain.model.ProductSort
+import com.pnc.adventureworksmobile.domain.repository.FakeOrderRepository
 import com.pnc.adventureworksmobile.domain.repository.FakeProductRepository
+import com.pnc.adventureworksmobile.domain.usecase.FilterAndSortProductsUseCase
+import com.pnc.adventureworksmobile.domain.usecase.GetRecentOrdersUseCase
 import com.pnc.adventureworksmobile.domain.repository.ProductRepository
 import com.pnc.adventureworksmobile.testutil.MainDispatcherRule
 import com.pnc.adventureworksmobile.testutil.builders.aProduct
@@ -26,12 +31,18 @@ class CatalogViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val repository = FakeProductRepository()
+    private val orderRepository = FakeOrderRepository()
     private val session = FakeDemoCustomerSession()
 
     private val catalogError = "We couldn't load the catalog. Check your internet connection and try again."
 
     private fun createViewModel(productRepository: ProductRepository = repository) =
-        CatalogViewModel(session = session, productRepository = productRepository)
+        CatalogViewModel(
+            session = session,
+            productRepository = productRepository,
+            filterAndSortProducts = FilterAndSortProductsUseCase(),
+            getRecentOrders = GetRecentOrdersUseCase(orderRepository),
+        )
 
     @Test
     fun `starts with the session customer and loading`() = runTest {
@@ -42,7 +53,7 @@ class CatalogViewModelTest {
 
     @Test
     fun `loaded products become ui models`() = runTest {
-        val product = aProduct(id = 749, name = "Road-150 Red, 62", listPrice = 3578.27)
+        val product = aProduct(id = 749, name = "Road-150 Red, 62", listPrice = BigDecimal("3578.27"))
         repository.productsResult = Result.success(listOf(product))
 
         val viewModel = createViewModel()
@@ -59,10 +70,10 @@ class CatalogViewModelTest {
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        assertEquals(
-            CatalogUiState(demoCustomer = session.activeCustomer, isLoading = false, errorMessage = catalogError),
-            viewModel.uiState.value,
-        )
+        val state = viewModel.uiState.value
+        assertFalse(state.isLoading)
+        assertEquals(catalogError, state.errorMessage)
+        assertTrue(state.products.isEmpty())
     }
 
     @Test
@@ -89,10 +100,10 @@ class CatalogViewModelTest {
             }
         }
         val viewModel = createViewModel(productRepository = slowRepository)
-        advanceUntilIdle()                  // the first load finishes
+        advanceUntilIdle()
 
         viewModel.refresh()
-        runCurrent()                        // the refresh starts, then waits at its delay
+        runCurrent()
 
         assertFalse(viewModel.uiState.value.isLoading)
         assertEquals(1, viewModel.uiState.value.products.size)

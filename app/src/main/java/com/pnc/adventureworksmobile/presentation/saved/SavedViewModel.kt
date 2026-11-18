@@ -69,7 +69,7 @@ class SavedViewModel @Inject constructor(
                     _uiState.update { currentState ->
                         currentState.copy(
                             isLoading = false,
-                            // This Flow only reads Room, so any error here is a local storage error.
+
                             errorMessage = AppError.LocalStorage.toFriendlyMessage(ErrorSubject.SavedProducts),
                         )
                     }

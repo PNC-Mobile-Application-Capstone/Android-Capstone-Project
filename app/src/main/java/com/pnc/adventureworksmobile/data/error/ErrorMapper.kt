@@ -10,14 +10,6 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
 
-
- // Turns a raw exception into an AppError.
- //
- // Order matters:
- // - InterruptedIOException is checked before IOException. It covers
- //   `SocketTimeoutException` and OkHttp's call timeout, which are both IOExceptions.
- // - TimeoutCancellationException (from `withTimeout`) is a timeout, not a cancel.
- 
 fun Throwable.toAppError(): AppError = when (this) {
     is AppException -> error
     is TimeoutCancellationException -> AppError.Timeout
@@ -29,7 +21,6 @@ fun Throwable.toAppError(): AppError = when (this) {
     else -> AppError.Unknown
 }
 
-// Maps an HTTP status code to an AppError. Only called for non-2xx responses.
 fun httpCodeToAppError(code: Int): AppError = when (code) {
     401, 403 -> AppError.Unauthorized
     404 -> AppError.NotFound
@@ -37,14 +28,6 @@ fun httpCodeToAppError(code: Int): AppError = when (code) {
     else -> AppError.Server(code)
 }
 
-
- // Use in repositories in place of `runCatching`.
- //
- // - Success comes back as Result.success.
- // - A failure comes back as Result.failure holding an AppException.
- // - A real CancellationException is thrown again so `viewModelScope` can cancel cleanly.
- //   `runCatching` swallows it, which can leave a screen stuck.
- 
 suspend fun <T> safeCall(block: suspend () -> T): Result<T> = try {
     Result.success(block())
 } catch (e: TimeoutCancellationException) {

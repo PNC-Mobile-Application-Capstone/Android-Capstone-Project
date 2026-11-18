@@ -78,11 +78,8 @@ private val ModernPlainLightColorScheme = lightColorScheme(
     outline = ModernPlainOutline,
 )
 
-// Swap palettes by commenting one pair and uncommenting the other.
 private val ActiveDarkColorScheme = AdventureDarkColorScheme
 private val ActiveLightColorScheme = AdventureLightColorScheme
-// private val ActiveDarkColorScheme = ModernPlainDarkColorScheme
-// private val ActiveLightColorScheme = ModernPlainLightColorScheme
 
 @Composable
 fun AdventureWorksMobileTheme(

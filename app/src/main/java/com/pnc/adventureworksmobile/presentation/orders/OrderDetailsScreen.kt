@@ -148,7 +148,6 @@ private fun OrderDetailsContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Product info
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -194,7 +193,6 @@ private fun OrderDetailsContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Shipping & Summary
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -224,7 +222,6 @@ private fun OrderDetailsContent(
             }
         }
 
-        // Contact info if present
         val fullName = listOfNotNull(details.firstName, details.middleName, details.lastName)
             .filter { it.isNotBlank() }
             .joinToString(" ")

@@ -21,7 +21,7 @@ fun Product.toSavedProductEntity(savedAtEpochMillis: Long) = SavedProductEntity(
     savedAtEpochMillis = savedAtEpochMillis,
     name = name,
     productNumber = productNumber,
-    listPrice = listPrice,
+    listPrice = listPrice.toMoneyColumn(),
     thumbnailBase64 = thumbnailBase64,
     thumbnailPhotoFileName = thumbnailPhotoFileName,
 )
@@ -30,7 +30,7 @@ fun SavedProductEntity.toProduct() = Product(
     id = productId,
     name = name.ifBlank { "Saved product" },
     productNumber = productNumber,
-    listPrice = listPrice,
+    listPrice = listPrice.toMoney(),
     thumbnailBase64 = thumbnailBase64,
     thumbnailPhotoFileName = thumbnailPhotoFileName,
 )

@@ -10,6 +10,7 @@ import com.pnc.adventureworksmobile.presentation.shared.ErrorSubject
 import com.pnc.adventureworksmobile.presentation.shared.toFriendlyMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,13 +41,27 @@ class RecentlyViewedViewModel @Inject constructor(
 
     fun retry() = observeRecentlyViewed()
 
+    fun clearHistory() {
+        viewModelScope.launch {
+            try {
+                productRepository.clearRecentlyViewed()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = AppError.LocalStorage.toFriendlyMessage(ErrorSubject.ClearRecentlyViewed))
+                }
+            }
+        }
+    }
+
     private fun observeRecentlyViewed() {
         recentProductsJob?.cancel()
         recentProductsJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = it.products.isEmpty(), errorMessage = null) }
             productRepository.observeRecentlyViewedProducts()
                 .catch {
-                    // This Flow only reads Room, so any error here is a local storage error.
+
                     _uiState.update {
                         it.copy(
                             isLoading = false,

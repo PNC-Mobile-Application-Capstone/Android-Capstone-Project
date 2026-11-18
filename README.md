@@ -1,70 +1,36 @@
 # AdventureWorks Customer Companion
 
-Android app for browsing Adventure Works products, viewing product details, and saving products.
+An Android app for discovering AdventureWorks products, saving favorites, viewing recently viewed products, and checking customer orders. Built with Kotlin, Jetpack Compose, Retrofit, Hilt, and Room.
 
-## Current features
+## Setup
 
-- Product catalog loaded from the Adventure Works API
-- Search, category filters, and name or price sorting
-- Product detail screen
-- Offline saved-product snapshots and recently-viewed persistence with Room
-- Light and dark Compose themes
-- Catalog, Orders, and Saved navigation
+1. Open the project in Android Studio with JDK 17 or Android Studio's embedded JDK.
+2. Allow Gradle sync to complete.
+3. Run the `app` configuration on an Android 8.0 (API 26) or newer emulator or device.
 
-The Saved screen displays locally persisted products in most-recently-saved order and supports removal
-and navigation back to product details.
+## Configuration
 
-## Demo customer
-
-`DefaultDemoCustomerSession` contains the assigned customer:
-
-- Customer ID: `11711`
-- Display name: `Daniel Davis`
-
-## API
-
-The base URL is defined as `BuildConfig.BASE_URL` in `app/build.gradle.kts`:
-
-```text
-https://api.bootcampcentral.com/
-```
-
-## Open and run
-
-1. Open the repository root in Android Studio.
-2. Use JDK 17 or Android Studio's embedded JDK.
-3. Allow Gradle sync to finish.
-4. Select the `app` run configuration and an API 26+ emulator or device.
-5. Run the app.
+- **Demo customer:** Daniel Davis, customer ID `11711`, configured in `core/session/DemoCustomerSession.kt`. 
+- **API base URL:** `https://api.bootcampcentral.com/`, configured as `BuildConfig.BASE_URL` in `app/build.gradle.kts`.
 
 ## Build and test
 
-From PowerShell at the repository root:
+Run from the project root in PowerShell:
 
 ```powershell
 .\gradlew.bat assembleDebug
 .\gradlew.bat testDebugUnitTest
 .\gradlew.bat lintDebug
+.\gradlew.bat connectedDebugAndroidTest  # Requires a connected device or running emulator
 ```
 
 The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
 
-## Source layout
-
-```text
-com.pnc.adventureworksmobile
-|-- core/session       Demo customer session
-|-- data/local         Room database and DAOs
-|-- data/remote        Retrofit API and DTOs
-|-- data/repository    Repository implementation
-|-- di                 Hilt modules
-|-- domain             Product models and repository contract
-|-- presentation       Catalog, product, orders, saved, and recent UI
-`-- navigation         App navigation
-```
+Unit tests cover catalog behavior, saved and recently viewed products, orders, error handling, and data mapping. The instrumented `SavedProductMigrationTest` checks the Room database migration from version 2 to 3.
 
 ## Known limitations
 
-- Saved products from database version 2 retain their IDs and show a temporary unavailable state until
-  the catalog next loads successfully and refreshes their cached product information.
-- Product details still require the API, even when the product summary is available offline.
+- Product details and orders require an API connection. Saved and recently viewed product summaries are available offline.
+- Saved products migrated from database version 2 show an unavailable state until a successful catalog refresh updates their information.
+- Order amounts use `Double`, and the Orders screen does not yet support pull-to-refresh.
+- Saved and recently viewed prices pass through floating-point storage before being rounded to two decimal places.
