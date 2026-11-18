@@ -1,6 +1,6 @@
 package com.pnc.adventureworksmobile.domain.usecase
 
-import com.pnc.adventureworksmobile.domain.model.Order
+import com.pnc.adventureworksmobile.domain.model.OrderLine
 import com.pnc.adventureworksmobile.domain.repository.OrderRepository
 import java.math.BigDecimal
 import javax.inject.Inject
@@ -16,12 +16,12 @@ class GetRecentOrdersUseCase @Inject constructor(
     private val orderRepository: OrderRepository,
 ) {
     suspend operator fun invoke(customerId: Int, limit: Int = DEFAULT_LIMIT): Result<List<RecentOrder>> =
-        orderRepository.getOrders(customerId).map { lines -> summarize(lines, limit) }
+        orderRepository.getOrderLines(customerId).map { lines -> summarize(lines, limit) }
 
     companion object {
         const val DEFAULT_LIMIT = 3
 
-        fun summarize(lines: List<Order>, limit: Int = DEFAULT_LIMIT): List<RecentOrder> = lines
+        fun summarize(lines: List<OrderLine>, limit: Int = DEFAULT_LIMIT): List<RecentOrder> = lines
             .groupBy { it.orderNumber }
             .map { (orderNumber, orderLines) ->
                 RecentOrder(

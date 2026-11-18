@@ -15,7 +15,8 @@ fun aProduct(
     productNumber: String = "TP-001",
     thumbnailBase64: String? = "thumbnail-base64",
     thumbnailPhotoFileName: String? = "thumbnail.gif",
-    listPrice: Double = 10.0,
+    listPrice: BigDecimal = BigDecimal("10.00"),
+    stockLevel: Int? = null,
 ) = Product(
     id = id,
     name = name,
@@ -23,6 +24,7 @@ fun aProduct(
     thumbnailBase64 = thumbnailBase64,
     thumbnailPhotoFileName = thumbnailPhotoFileName,
     listPrice = listPrice,
+    stockLevel = stockLevel,
 )
 
 fun aProductDetails(
