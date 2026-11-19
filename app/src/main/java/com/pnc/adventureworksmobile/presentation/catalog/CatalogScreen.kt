@@ -422,14 +422,13 @@ private fun RecentOrderCard(order: RecentOrderUiModel, onClick: () -> Unit) {
             Text(
                 text = order.itemSummary,
                 maxLines = 2,
-                minLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall,
             )
             Text(
                 text = order.total,
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 4.dp),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
             )
