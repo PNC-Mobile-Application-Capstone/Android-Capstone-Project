@@ -1,6 +1,7 @@
 package com.pnc.adventureworksmobile.presentation.orders
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,9 +28,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.pnc.adventureworksmobile.domain.model.OrderDetails
 import com.pnc.adventureworksmobile.presentation.shared.ErrorView
@@ -41,6 +44,7 @@ fun OrderDetailsScreen(
     uiState: OrderDetailsUiState,
     onBack: () -> Unit,
     onRetry: () -> Unit,
+    onProductClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -70,6 +74,7 @@ fun OrderDetailsScreen(
                 OrderDetailsContent(
                     details = uiState.orderDetails,
                     onBack = onBack,
+                    onProductClick = onProductClick,
                     modifier = Modifier.align(Alignment.TopCenter),
                 )
             }
@@ -81,6 +86,7 @@ fun OrderDetailsScreen(
 private fun OrderDetailsContent(
     details: OrderDetails,
     onBack: () -> Unit,
+    onProductClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
@@ -168,8 +174,18 @@ private fun OrderDetailsContent(
                     line.productName?.let {
                         Text(
                             text = it,
+                            modifier = Modifier
+                                .defaultMinSize(minHeight = 48.dp)
+                                .clickable(
+                                    role = Role.Button,
+                                    onClickLabel = "view product",
+                                    onClick = { onProductClick(line.productId) },
+                                )
+                                .padding(vertical = 12.dp),
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            textDecoration = TextDecoration.Underline,
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                     }

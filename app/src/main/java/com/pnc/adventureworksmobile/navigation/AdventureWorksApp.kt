@@ -173,6 +173,9 @@ fun AdventureWorksApp() {
                     uiState = uiState,
                     onBack = navController::navigateUp,
                     onRetry = viewModel::retry,
+                    onProductClick = { productId ->
+                        navController.navigate("product/$productId")
+                    },
                 )
             }
             composable(TopLevelDestination.Saved.route) {
