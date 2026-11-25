@@ -93,11 +93,12 @@ fun CatalogScreen(
 
     val filterKey = uiState.selectedCategory to uiState.selectedSort
     var previousFilterKey by remember { mutableStateOf(filterKey) }
-    val categoriesIndex = if (uiState.showsHomeSections) 3 else 1
+    // On filter change, scroll to the "All products" header (chips sit just below it).
+    val filterScrollIndex = if (uiState.showsHomeSections) 3 else 1
     LaunchedEffect(filterKey) {
         if (filterKey != previousFilterKey) {
             previousFilterKey = filterKey
-            gridState.scrollToItem(categoriesIndex)
+            gridState.scrollToItem(filterScrollIndex)
         }
     }
 
@@ -140,14 +141,6 @@ fun CatalogScreen(
                 }
             }
 
-            fullWidthItem("categories") {
-                CategoryChips(
-                    categories = uiState.categories,
-                    selectedCategory = uiState.selectedCategory,
-                    onCategorySelected = onCategorySelected,
-                )
-            }
-
             fullWidthItem("products-title") {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -160,6 +153,14 @@ fun CatalogScreen(
                         onSortSelected = onSortSelected,
                     )
                 }
+            }
+
+            fullWidthItem("categories") {
+                CategoryChips(
+                    categories = uiState.categories,
+                    selectedCategory = uiState.selectedCategory,
+                    onCategorySelected = onCategorySelected,
+                )
             }
 
             productItems(
@@ -383,8 +384,10 @@ private fun RecentOrdersHomeSection(
                     InlineError(message = section.errorMessage, onRetry = onRetry)
                 }
 
-                section.orders.forEach { order ->
-                    RecentOrderRow(order = order, onClick = onSeeAll)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(section.orders, key = { it.orderNumber }) { order ->
+                        RecentOrderCard(order = order, onClick = onSeeAll)
+                    }
                 }
             }
         }
@@ -392,35 +395,40 @@ private fun RecentOrdersHomeSection(
 }
 
 @Composable
-private fun RecentOrderRow(order: RecentOrderUiModel, onClick: () -> Unit) {
+private fun RecentOrderCard(order: RecentOrderUiModel, onClick: () -> Unit) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .width(200.dp)
             .heightIn(min = 48.dp)
             .clickable(role = Role.Button, onClickLabel = "open your orders", onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = order.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = "${order.date} · ${order.itemSummary}",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+            Text(
+                text = order.title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = order.date,
+                modifier = Modifier.padding(top = 2.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(
+                text = order.itemSummary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
             Text(
                 text = order.total,
-                modifier = Modifier.padding(start = 12.dp),
+                modifier = Modifier.padding(top = 4.dp),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
             )
